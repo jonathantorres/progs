@@ -1,0 +1,7 @@
+bin/*
+/target
+*.sublime-project
+*.sublime-workspace
+*.o
+*.gch
+**/*.rs.bk
