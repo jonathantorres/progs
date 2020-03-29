@@ -1,41 +1,32 @@
 VPATH := src tests bin
 CFLAGS := gcc -std=gnu11 -Wall -Wextra -Isrc
 
-all: test
+all: fserve
 
-server: server.c server.h request.o response.o router.o static_file.o htable.o array.o dllist.o
-	$(CFLAGS) src/server.c request.o response.o router.o static_file.o htable.o array.o dllist.o -o bin/server
+install:
+	echo "Install here"
 
-request_test: request_test.c request.o
-	$(CFLAGS) tests/request_test.c request.o htable.o array.o -o bin/request_test
+fserve: fserve.c fserve.h request.o response.o router.o static_file.o h_table.o array.o dl_list.o
+	$(CFLAGS) src/fserve.c request.o response.o router.o static_file.o h_table.o array.o dl_list.o -o bin/fserve
+
 request.o: request.c request.h
 	$(CFLAGS) -c src/request.c src/request.h
-
 response.o: response.c response.h
 	$(CFLAGS) -c src/response.c src/response.h
-
 router.o: router.c router.h
 	$(CFLAGS) -c src/router.c src/router.h
-
 static_file.o: static_file.c static_file.h
 	$(CFLAGS) -c src/static_file.c src/static_file.h
-
-# Hash Table
-htable_test: htable_test.c htable.o array.o
-	$(CFLAGS) tests/htable_test.c htable.o array.o -o bin/htable_test
-htable.o: htable.c htable.h
-	$(CFLAGS) -c src/htable.c src/htable.h
-
-# Array
+h_table.o: h_table.c h_table.h
+	$(CFLAGS) -c src/h_table.c src/h_table.h
 array.o: array.c array.h
 	$(CFLAGS) -c src/array.c src/array.h
-array_test: array_test.c array.o
-	$(CFLAGS) tests/array_test.c array.o -o bin/array_test
+dl_list.o: dl_list.c dl_list.h
+	$(CFLAGS) -c src/dl_list.c src/dl_list.h
 
-dllist.o: dllist.c dllist.h
-	$(CFLAGS) -c src/dllist.c src/dllist.h
-
-# Example test
+# Tests
+request_test: request_test.c request.o
+	$(CFLAGS) tests/request_test.c request.o h_table.o array.o -o bin/request_test
 example_test: example_test.c
 	$(CFLAGS) tests/example_test.c -o bin/example_test
 
