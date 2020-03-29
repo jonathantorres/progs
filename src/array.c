@@ -1,12 +1,22 @@
 #include "array.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define EXPAND_RATE 100
 
+void *_array_remove_element_at(array *_array, unsigned int index)
+{
+    if (_array->contents[index] != NULL) {
+        void *element = _array->contents[index];
+        _array->contents[index] = NULL;
+        _array->len--;
+
+        return element;
+    }
+
+    return NULL;
+}
+
 // creates a new empty array
-array *array_create(unsigned int capacity, size_t item_size)
+array *array_new(unsigned int capacity, size_t item_size)
 {
     array *_array = malloc(sizeof(array));
 
@@ -15,7 +25,7 @@ array *array_create(unsigned int capacity, size_t item_size)
         return NULL;
     }
 
-    _array->length = 0;
+    _array->len = 0;
     _array->capacity = capacity;
     _array->expand_rate = EXPAND_RATE;
     _array->item_size = item_size;
@@ -29,34 +39,37 @@ array *array_create(unsigned int capacity, size_t item_size)
     return _array;
 }
 
-// empties and destroys the array completely
-void array_destroy(array *_array)
+// empties and frees the array completely
+void array_free(array *_array, array_free_cb cb)
 {
     if (!_array) {
         fputs("[array_destroy] Must provide an array.", stderr);
         return;
     }
 
-    array_clear(_array);
+    array_clear(_array, cb);
     free(_array->contents);
     free(_array);
 }
 
 // removes all the elements on the array, leaving it empty
-void array_clear(array *_array)
+void array_clear(array *_array, array_free_cb cb)
 {
     if (!_array) {
         fputs("[array_clear] Must provide an array.", stderr);
         return;
     }
 
-    unsigned int array_length = _array->length;
+    unsigned int array_len = _array->len;
 
-    for (unsigned int i = 0; i < array_length; i++) {
+    for (unsigned int i = 0; i < array_len; i++) {
         if (_array->contents[i]) {
+            if (cb) {
+                cb(_array->contents[i]);
+            }
             _array->contents[i] = NULL;
         }
-        _array->length--;
+        _array->len--;
     }
 }
 
@@ -82,26 +95,13 @@ void array_push(array *_array, void *value)
         return;
     }
 
-    _array->contents[_array->length] = value;
-    _array->length++;
+    _array->contents[_array->len] = value;
+    _array->len++;
 
     // expand if necessary
-    if (_array->length >= _array->capacity) {
+    if (_array->len >= _array->capacity) {
         array_expand(_array);
     }
-}
-
-void *remove_element_at(array *_array, unsigned int index)
-{
-    if (_array->contents[index] != NULL) {
-        void *element = _array->contents[index];
-        _array->contents[index] = NULL;
-        _array->length--;
-
-        return element;
-    }
-
-    return NULL;
 }
 
 // remove last element and return it
@@ -113,8 +113,8 @@ void *array_pop(array *_array)
     }
 
     void *element = NULL;
-    if (_array->length > 0) {
-        element = remove_element_at(_array, _array->length - 1);
+    if (_array->len > 0) {
+        element = _array_remove_element_at(_array, _array->len - 1);
     }
 
     return element;
@@ -133,8 +133,8 @@ void array_set(array *_array, void *elem, unsigned int index)
         return;
     }
 
-    if (index >= _array->length) {
-        _array->length = index + 1;
+    if (index >= _array->len) {
+        _array->len = index + 1;
     }
 
     _array->contents[index] = elem;
@@ -149,7 +149,7 @@ void *array_get(array *_array, unsigned int index)
     }
 
     // index is too large
-    if (index >= _array->length) {
+    if (index >= _array->len) {
         return NULL;
     }
 
@@ -165,17 +165,17 @@ void *array_remove(array *_array, unsigned int index)
     }
 
     // index is too large
-    if (index >= _array->length) {
+    if (index >= _array->len) {
         return NULL;
     }
 
-    void *element = remove_element_at(_array, index);
+    void *element = _array_remove_element_at(_array, index);
 
     if (element != NULL && _array->contents[index + 1] != NULL) {
         memmove(
             &_array->contents[index],
             &_array->contents[index + 1],
-            sizeof(_array->item_size) * (_array->length - index)
+            sizeof(_array->item_size) * (_array->len - index)
         );
     }
 
@@ -190,19 +190,19 @@ void array_shift(array *_array, void *value)
         return;
     }
 
-    if (_array->length > 0) {
+    if (_array->len > 0) {
         memmove(
             &_array->contents[1],
             _array->contents,
-            sizeof(_array->item_size) * _array->length
+            sizeof(_array->item_size) * _array->len
         );
     }
 
     _array->contents[0] = value;
-    _array->length++;
+    _array->len++;
 
     // expand if necessary
-    if (_array->length >= _array->capacity) {
+    if (_array->len >= _array->capacity) {
         array_expand(_array);
     }
 }
@@ -217,15 +217,37 @@ void *array_unshift(array *_array)
 
     void *element = NULL;
 
-    if (_array->length > 0) {
-        element = remove_element_at(_array, 0);
+    if (_array->len > 0) {
+        element = _array_remove_element_at(_array, 0);
 
         memmove(
             _array->contents,
             &_array->contents[1],
-            sizeof(_array->item_size) * _array->length
+            sizeof(_array->item_size) * _array->len
         );
     }
 
     return element;
+}
+
+void array_swap(array *_array, unsigned int a, unsigned int b)
+{
+    if (!_array) {
+        fputs("[array_swap] Must provide an array.", stderr);
+        return;
+    }
+    if (a == b) {
+        return;
+    }
+    if (a > _array->len-1 || b > _array->len-1) {
+        return;
+    }
+
+    void *a_tmp = array_get(_array, a);
+    void *b_tmp = array_get(_array, b);
+    if (!a_tmp || !b_tmp) {
+        return;
+    }
+    array_set(_array, b_tmp, a);
+    array_set(_array, a_tmp, b);
 }
