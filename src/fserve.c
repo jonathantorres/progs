@@ -157,6 +157,6 @@ int bind_and_listen()
 
 void set_default_response_headers(response *res)
 {
-    response_set_header(res, "Server", strdup("angus v0.0.1"));
+    response_set_header(res, "Server", strdup("fserve v0.0.1"));
     response_set_header(res, "Connection", strdup("close"));
 }

@@ -70,7 +70,7 @@ static char *raw_headers = NULL;
 static int raw_headers_len = 0;
 static int raw_headers_i = 0;
 
-int htable_compare_func(void *a, void *b)
+int h_table_compare_func(void *a, void *b)
 {
     return strcmp((char*)a, (char*)b);
 }
@@ -145,19 +145,17 @@ void response_set_header(response *res, char *key, char *value)
     if (!res->headers) {
         return;
     }
-    htable_set(res->headers, key, value);
+    h_table_set(res->headers, key, value);
 }
 
-bool set_raw_headers_str_len(htable_node *node)
+void set_raw_headers_str_len(h_table_node *node)
 {
     if (node && node->key && node->value) {
         raw_headers_len += (strlen((char*)node->key) + strlen((char*)node->value)) + 4;
     }
-
-    return true;
 }
 
-bool set_raw_headers_str(htable_node *node)
+void set_raw_headers_str(h_table_node *node)
 {
     char *raw_headers_p = (raw_headers + raw_headers_i);
 
@@ -189,8 +187,6 @@ bool set_raw_headers_str(htable_node *node)
         raw_headers_p++;
         raw_headers_i++;
     }
-
-    return true;
 }
 
 char *response_get_headers(response *res)
@@ -199,7 +195,7 @@ char *response_get_headers(response *res)
         return NULL;
     }
 
-    htable_traverse(res->headers, set_raw_headers_str_len);
+    h_table_traverse(res->headers, set_raw_headers_str_len);
 
     // add the final newline and terminator
     raw_headers_len += 3;
@@ -209,7 +205,7 @@ char *response_get_headers(response *res)
         return NULL;
     }
 
-    htable_traverse(res->headers, set_raw_headers_str);
+    h_table_traverse(res->headers, set_raw_headers_str);
     raw_headers[raw_headers_i++] = '\r';
     raw_headers[raw_headers_i++] = '\n';
     raw_headers[raw_headers_i] = '\0';
@@ -225,7 +221,7 @@ response *response_create(void)
         return NULL;
     }
 
-    htable *headers = htable_create(htable_compare_func);
+    h_table *headers = h_table_new(h_table_compare_func);
     if (!headers) {
         return NULL;
     }
@@ -247,10 +243,10 @@ void response_destroy(response *res)
     }
 
     if (res->headers) {
-        HTABLE_FOREACH(res->headers) {
+        H_TABLE_FOREACH(res->headers) {
             free(elem->value);
-        } HTABLE_FOREACH_END
-        htable_destroy(res->headers);
+        } H_TABLE_FOREACH_END
+        h_table_free(res->headers, NULL);
     }
 
     if (res->raw_headers) {

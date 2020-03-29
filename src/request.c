@@ -1,6 +1,6 @@
 #include "request.h"
 
-int htable_compare_fn(void *a, void *b)
+int h_table_compare_fn(void *a, void *b)
 {
     return strcmp((char*)a, (char*)b);
 }
@@ -60,7 +60,7 @@ void parse_request_headers(char *buffer, request *req)
     char *buf;
     int i = 0;
     int num_of_newlines = 0;
-    array *header_lines = array_create(20, sizeof(char *));
+    array *header_lines = array_new(20, sizeof(char *));
     int line_length = 256; // arbitrary
     char *cur_line = malloc(line_length);
 
@@ -103,7 +103,7 @@ void parse_request_headers(char *buffer, request *req)
         }
     }
 
-    for (unsigned int j = 0; j < header_lines->length; j++) {
+    for (unsigned int j = 0; j < header_lines->len; j++) {
         char *header_line = (char*)array_get(header_lines, j);
         int key_len = 0;
         int value_len = 0;
@@ -154,7 +154,7 @@ void parse_request_headers(char *buffer, request *req)
         *key_p = '\0';
         *val_p = '\0';
 
-        htable_set(req->headers, key, val);
+        h_table_set(req->headers, key, val);
         free(key);
     }
 
@@ -164,7 +164,7 @@ void parse_request_headers(char *buffer, request *req)
             free(cur_l);
         }
     }
-    array_destroy(header_lines);
+    array_free(header_lines, NULL);
 }
 
 void parse_request_body(char *buffer, request *req)
@@ -182,7 +182,7 @@ void parse_request_body(char *buffer, request *req)
 
     // we have a body in the request
     if (body_start_i > 0) {
-        char *content_len_str = htable_get(req->headers, "Content-Length");
+        char *content_len_str = h_table_get(req->headers, "Content-Length");
 
         if (content_len_str != NULL) {
             int content_len = atoi(content_len_str) + 1;
@@ -211,13 +211,13 @@ request *request_create(char *buffer)
     req->headers = NULL;
     req->uri_params = NULL;
 
-    htable *headers_p = htable_create(htable_compare_fn);
+    h_table *headers_p = h_table_new(h_table_compare_fn);
     if (headers_p == NULL) {
         free(req);
         return NULL;
     }
 
-    htable *uri_params_p = htable_create(htable_compare_fn);
+    h_table *uri_params_p = h_table_new(h_table_compare_fn);
     if (uri_params_p == NULL) {
         free(req);
         return NULL;
@@ -240,17 +240,17 @@ void request_destroy(request *req)
     }
 
     if (req->headers) {
-        HTABLE_FOREACH(req->headers) {
+        H_TABLE_FOREACH(req->headers) {
             free(elem->value);
-        } HTABLE_FOREACH_END
-        htable_destroy(req->headers);
+        } H_TABLE_FOREACH_END
+        h_table_free(req->headers, NULL);
     }
 
     if (req->uri_params) {
-        HTABLE_FOREACH(req->uri_params) {
+        H_TABLE_FOREACH(req->uri_params) {
             free(elem->value);
-        } HTABLE_FOREACH_END
-        htable_destroy(req->uri_params);
+        } H_TABLE_FOREACH_END
+        h_table_free(req->uri_params, NULL);
     }
 
     if (req->method) {

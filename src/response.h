@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "htable.h"
+#include "h_table.h"
 
 #define HTTP_VERSION 1.1
 
@@ -16,7 +16,7 @@ typedef struct http_status_code {
 typedef struct {
     int status_code;
     char *status_message;
-    htable *headers;
+    h_table *headers;
     char *raw_headers;
     char *body;
     int body_len;

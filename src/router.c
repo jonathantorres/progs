@@ -7,7 +7,7 @@ typedef struct {
     route_action action;
 } route;
 
-static dllist *routes = NULL;
+static dl_list *routes = NULL;
 
 void default_action(request *req, response *res)
 {
@@ -42,21 +42,21 @@ route *create_route(char *path, route_action action)
 
 void register_routes()
 {
-    routes = dllist_new();
+    routes = dl_list_new();
 
-    dllist_push(routes, create_route("/", default_action));
-    dllist_push(routes, create_route("/test", test_action));
+    dl_list_push(routes, create_route("/", default_action));
+    dl_list_push(routes, create_route("/test", test_action));
 }
 
 void destroy_routes()
 {
-    DLLIST_FOREACH(routes) {
+    DL_LIST_FOREACH(routes) {
         if (cur->value) {
             free(cur->value);
         }
     }
 
-    dllist_destroy(routes);
+    dl_list_free(routes, NULL);
 }
 
 bool router_handle_request(request *req, response *res)
@@ -64,7 +64,7 @@ bool router_handle_request(request *req, response *res)
     bool route_found = false;
     register_routes();
 
-    DLLIST_FOREACH(routes) {
+    DL_LIST_FOREACH(routes) {
         if (strcmp(req->uri, ((route*)cur->value)->path) == 0) {
             ((route*)cur->value)->action(req, res);
             route_found = true;

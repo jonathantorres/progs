@@ -9,7 +9,7 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include "array.h"
-#include "htable.h"
+#include "h_table.h"
 
 #define REQUEST_METHOD_GET "GET"
 #define REQUEST_METHOD_HEAD "HEAD"
@@ -23,8 +23,8 @@
 typedef struct {
     char *method;
     char *uri;
-    htable *headers;
-    htable *uri_params;
+    h_table *headers;
+    h_table *uri_params;
     char *body;
 } request;
 
