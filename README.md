@@ -1,11 +1,15 @@
-Angus
+Fserve
 ================
-An experimental web framework, still a work in progress.
 
-#### Installation
+A static file server, run `fserve` inside a directory and it will serve the files in it
+
+#### Compile and Install
 ``` bash
-
+make
+make install
 ```
+
+This will create the executable `fserve` and add it to `/usr/local/bin`, make sure this directory is in your `$PATH`.
 
 #### Running tests
 ``` bash
