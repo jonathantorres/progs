@@ -4,10 +4,21 @@ int bind_and_listen();
 void set_default_response_headers(response *res);
 void *create_request_buffer(int conn_fd);
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int server_fd, conn_fd;
     int port = DEFAULT_PORT;
+    char *dir = NULL;
+
+    for (int i = 1; i < argc - 1; i++) {
+        if (strcmp("-p", argv[i]) == 0) {
+            port = atoi(argv[i+1]);
+        }
+
+        if (strcmp("-d", argv[i]) == 0) {
+            dir = strdup(argv[i+1]);
+        }
+    }
 
     request *req = NULL;
     response *res = NULL;
