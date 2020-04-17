@@ -3,6 +3,7 @@
 int bind_and_listen(int port);
 void set_default_response_headers(response *res);
 void *create_request_buffer(int conn_fd);
+void serve_404(response *res);
 
 int main(int argc, char *argv[])
 {
@@ -60,10 +61,7 @@ int main(int argc, char *argv[])
         file_found = static_file_serve(req, res);
 
         if (!file_found) {
-            char *not_found_msg = "Not found\n";
-            response_set_status_code(res, 404);
-            response_set_body(res, strdup(not_found_msg));
-            response_set_body_len(res, strlen(not_found_msg));
+            serve_404(res);
         }
         set_default_response_headers(res);
 
@@ -162,4 +160,16 @@ void set_default_response_headers(response *res)
 {
     response_set_header(res, "Server", strdup("fserve v0.0.1"));
     response_set_header(res, "Connection", strdup("close"));
+}
+
+void serve_404(response *res)
+{
+    char *not_found_msg = "Not found\n";
+    char not_found_len_str[3] = {0, 0, 0};
+    snprintf(not_found_len_str, 3, "%d", (int)strlen(not_found_msg));
+    response_set_status_code(res, 404);
+    response_set_body(res, strdup(not_found_msg));
+    response_set_body_len(res, strlen(not_found_msg));
+    response_set_header(res, "Content-Length", strdup(not_found_len_str));
+    response_set_header(res, "Content-Type", strdup("text/html"));
 }
