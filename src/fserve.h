@@ -15,7 +15,6 @@
 
 #include "request.h"
 #include "response.h"
-#include "router.h"
 #include "static_file.h"
 
 #define DEFAULT_PORT 9090

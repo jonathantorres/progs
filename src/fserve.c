@@ -56,23 +56,15 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        bool route_found = router_handle_request(req, res);
-        bool file_found  = false;
+        bool file_found = false;
+        file_found = static_file_serve(req, res);
 
-        if (!route_found) {
-            // if the route is not found,
-            // try to use the path for a static file
-            // if it also fails, set a 404 response code
-            file_found = static_file_serve(req, res);
-
-            if (!file_found) {
-                char *not_found_msg = "Not found\n";
-                response_set_status_code(res, 404);
-                response_set_body(res, strdup(not_found_msg));
-                response_set_body_len(res, strlen(not_found_msg));
-            }
+        if (!file_found) {
+            char *not_found_msg = "Not found\n";
+            response_set_status_code(res, 404);
+            response_set_body(res, strdup(not_found_msg));
+            response_set_body_len(res, strlen(not_found_msg));
         }
-
         set_default_response_headers(res);
 
         char *http_status_line = response_get_start_line(res);
