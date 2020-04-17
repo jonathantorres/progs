@@ -1,6 +1,6 @@
 #include "fserve.h"
 
-int bind_and_listen();
+int bind_and_listen(int port);
 void set_default_response_headers(response *res);
 void *create_request_buffer(int conn_fd);
 
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     request *req = NULL;
     response *res = NULL;
 
-    if ((server_fd = bind_and_listen()) < 0) {
+    if ((server_fd = bind_and_listen(port)) < 0) {
         exit(1);
     }
 
@@ -125,7 +125,7 @@ void *create_request_buffer(int conn_fd)
     return recv_buff;
 }
 
-int bind_and_listen()
+int bind_and_listen(int port)
 {
     int server_fd;
     struct sockaddr_in server_addr;
@@ -141,7 +141,7 @@ int bind_and_listen()
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(DEFAULT_PORT);
+    server_addr.sin_port = htons(port);
 
     // re-use the address when stopping and restarting the server
     int reuse_addr = 1;
