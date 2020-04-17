@@ -28,7 +28,11 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    printf("Server running on port %d\n", port);
+    printf("Server running on port %d", port);
+    if (dir) {
+        printf(" and path '%s'", dir);
+    }
+    printf("\n");
 
     while (true) {
         char *req_buff = NULL;
@@ -58,7 +62,7 @@ int main(int argc, char *argv[])
         }
 
         bool file_found = false;
-        file_found = static_file_serve(req, res);
+        file_found = static_file_serve(req, res, dir);
 
         if (!file_found) {
             serve_404(res);
@@ -89,6 +93,7 @@ int main(int argc, char *argv[])
         response_destroy(res);
     }
     close(server_fd);
+    free(dir);
     return 0;
 }
 

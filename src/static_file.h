@@ -8,6 +8,6 @@
 #include "request.h"
 #include "response.h"
 
-bool static_file_serve(request *req, response *res);
+bool static_file_serve(request *req, response *res, char *path);
 
 #endif
