@@ -3,13 +3,12 @@ Fserve
 
 A static file server, run `fserve` inside a directory and it will serve the files in it
 
-#### Compile and Install
+#### Compile program
 ``` bash
 make
-make install
 ```
 
-This will create the executable `fserve` and add it to `/usr/local/bin`, make sure this directory is in your `$PATH`.
+This will create the executable `./bin/fserve` you can move this file to a place of your choice, preferably a directory that is on your `$PATH`.
 
 #### Running tests
 ``` bash
