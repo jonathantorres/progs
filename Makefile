@@ -3,9 +3,6 @@ CFLAGS := gcc -std=gnu11 -Wall -Wextra -Isrc
 
 all: fserve
 
-install:
-	echo "Install here"
-
 fserve: fserve.c fserve.h request.o response.o static_file.o h_table.o array.o dl_list.o
 	$(CFLAGS) src/fserve.c request.o response.o static_file.o h_table.o array.o dl_list.o -o bin/fserve
 
