@@ -10,11 +10,10 @@ func main() {
 		fmt.Println("usage: gonew [project]")
 		os.Exit(1)
 	}
-	// var project string = os.Args[1]
 	var files []string = []string{
-		"main",
-		"gitignore",
-		"readme",
+		gitignoreText,
+		mainText,
+		readmeText,
 	}
 	for _, file := range files {
 		fmt.Println(file)
