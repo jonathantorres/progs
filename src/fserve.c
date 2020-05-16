@@ -9,21 +9,15 @@ int main(int argc, char *argv[])
 {
     int server_fd, conn_fd;
     int port = DEFAULT_PORT;
-    char *dir = NULL;
 
     for (int i = 1; i < argc - 1; i++) {
         if (strcmp("-p", argv[i]) == 0) {
             port = atoi(argv[i+1]);
         }
-
-        if (strcmp("-d", argv[i]) == 0) {
-            dir = strdup(argv[i+1]);
-        }
     }
 
     request *req = NULL;
     response *res = NULL;
-
     if ((server_fd = bind_and_listen(port)) < 0) {
         exit(1);
     }
