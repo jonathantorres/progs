@@ -16,7 +16,6 @@ typedef struct {
 #define FILE_TYPE_BINARY 0
 #define FILE_TYPE_TEXT 1
 #define CONTENT_TYPES_LEN 28
-#define DEFAULT_PATH "public"
 
 static content_type_t content_types[CONTENT_TYPES_LEN] = {
     { "html", "text/html", FILE_TYPE_TEXT },
@@ -118,11 +117,9 @@ char *_get_content_len_str(size_t contents_len)
     return content_len_str;
 }
 
-char *_get_file_path(request *req, char *path)
+char *_get_file_path(request *req)
 {
-    if (!path) {
-        path = DEFAULT_PATH;
-    }
+    char *path = "public"; // TODO: This should come from a configuration setting
     int file_to_serve_len = (strlen(path) + strlen(req->uri)) + 1;
     char *file_to_serve = malloc(file_to_serve_len);
     if (!file_to_serve) {
@@ -194,9 +191,9 @@ void _serve_file(request *req, response *res, char *contents, size_t contents_le
     free(content_len_str);
 }
 
-bool static_file_serve(request *req, response *res, char *path)
+bool static_file_serve(request *req, response *res)
 {
-    char *file_to_serve = _get_file_path(req, path);
+    char *file_to_serve = _get_file_path(req);
     if (!file_to_serve) {
         return false;
     }
