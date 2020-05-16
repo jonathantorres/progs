@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 
     while (true) {
         char *req_buff = NULL;
-
         if ((conn_fd = accept(server_fd, (struct sockaddr*) NULL, NULL)) < 0) {
             perror("server: accept()");
             continue;
