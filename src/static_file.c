@@ -119,8 +119,10 @@ char *_get_content_len_str(size_t contents_len)
 
 char *_get_file_path(request *req)
 {
-    char *path = "public"; // TODO: This should come from a configuration setting
-    int file_to_serve_len = (strlen(path) + strlen(req->uri)) + 1;
+    char *path = ""; // TODO: This should come from a configuration setting
+    int file_to_serve_len = strlen(req->uri);
+    // int file_to_serve_len = strlen(req->uri) + 1;
+    // int file_to_serve_len = (strlen(path) + strlen(req->uri)) + 1;
     char *file_to_serve = malloc(file_to_serve_len);
     if (!file_to_serve) {
         return NULL;
@@ -222,6 +224,7 @@ bool static_file_serve(request *req, response *res)
         FILE *fp = fopen(file_to_serve, "r");
         if (!fp) {
             perror("file opening failed");
+            printf("%s\n", file_to_serve);
             return false;
         }
         contents_len = _get_text_file_contents_len(fp);
