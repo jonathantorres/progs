@@ -119,19 +119,44 @@ char *_get_content_len_str(size_t contents_len)
 
 char *_get_file_path(request *req)
 {
-    char *path = ""; // TODO: This should come from a configuration setting
-    int file_to_serve_len = strlen(req->uri);
-    // int file_to_serve_len = strlen(req->uri) + 1;
-    // int file_to_serve_len = (strlen(path) + strlen(req->uri)) + 1;
+    char *uri = NULL;
+    char *uri_p = NULL;
+    char *req_uri_p = NULL;
+    int uri_len = strlen(req->uri);
+    uri = malloc(uri_len);
+    if (!uri) {
+        return NULL;
+    }
+    memset(uri, 0, uri_len);
+    uri_p = uri;
+    req_uri_p = req->uri;
+
+    bool slash_found = false;
+    while (*req_uri_p != '\0') {
+        if (*req_uri_p == '/' && slash_found == false) {
+            slash_found = true;
+            req_uri_p++;
+            continue;
+        }
+        *uri_p++ = *req_uri_p++;
+    }
+
+    // requested /, maybe try an index file?
+    if (strcmp(uri, "") == 0) {
+        free(uri);
+        return NULL;
+    }
+
+    int file_to_serve_len = strlen(uri);
     char *file_to_serve = malloc(file_to_serve_len);
     if (!file_to_serve) {
+        free(uri);
         return NULL;
     }
     memset(file_to_serve, 0, file_to_serve_len);
     file_to_serve[0] = '\0';
-    strcat(file_to_serve, path);
-    strcat(file_to_serve, req->uri);
-
+    strcat(file_to_serve, uri);
+    free(uri);
     return file_to_serve;
 }
 
