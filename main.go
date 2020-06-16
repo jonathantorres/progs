@@ -1,16 +1,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"flag"
 )
 
 func main() {
 	var gitignore = flag.Bool("gitignore", false, "Generate a .gitignore file")
 	var name string
 	flag.Parse()
-	if (len(flag.Args()) == 0) {
+	if len(flag.Args()) == 0 {
 		fmt.Println("usage: gonew [--options] [project_name]")
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -19,8 +19,8 @@ func main() {
 	name = flag.Args()[0]
 	createRootFolder(&name)
 	createMain(&name)
-	if (*gitignore) {
-		createGitIgnore(&name);
+	if *gitignore {
+		createGitIgnore(&name)
 	}
 }
 
@@ -32,12 +32,12 @@ func createRootFolder(name *string) {
 
 func createGitIgnore(path *string) {
 	file, err := os.Create(*path + "/.gitignore")
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("Could not create .gitignore file:", err)
 		return
 	}
 	_, err = file.Write([]byte(gitignoreText))
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("Could not write code to .gitignore file:", err)
 		return
 	}
@@ -45,12 +45,12 @@ func createGitIgnore(path *string) {
 
 func createMain(path *string) {
 	file, err := os.Create(*path + "/main.go")
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("Could not create main.go file:", err)
 		return
 	}
 	_, err = file.Write([]byte(mainText))
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("Could not write code to main.go file:", err)
 		return
 	}

@@ -15,7 +15,7 @@ var gitignoreText string = `# Binaries for programs and plugins
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-`;
+`
 
 var mainText string = `package main
 
@@ -24,7 +24,7 @@ import "fmt"
 func main() {
 	fmt.Println("hello world")
 }
-`;
+`
 
 var readmeText string = `# {project}
-`;
+`
