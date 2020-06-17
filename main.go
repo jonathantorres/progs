@@ -36,6 +36,7 @@ func createGitIgnore(path *string) {
 		fmt.Println("Could not create .gitignore file:", err)
 		return
 	}
+	defer file.Close()
 	_, err = file.Write([]byte(gitignoreText))
 	if err != nil {
 		fmt.Println("Could not write code to .gitignore file:", err)
@@ -49,6 +50,7 @@ func createMain(path *string) {
 		fmt.Println("Could not create main.go file:", err)
 		return
 	}
+	defer file.Close()
 	_, err = file.Write([]byte(mainText))
 	if err != nil {
 		fmt.Println("Could not write code to main.go file:", err)
