@@ -11,7 +11,7 @@ func main() {
 	var name string
 	flag.Parse()
 	if len(flag.Args()) == 0 {
-		fmt.Println("usage: gonew [--options] [project_name]")
+		fmt.Println("usage: gonew [--options] [project name]")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
