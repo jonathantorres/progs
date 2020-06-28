@@ -19,7 +19,9 @@ var gitignoreText string = `# Binaries for programs and plugins
 
 var mainText string = `package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	fmt.Println("hello world")
