@@ -12,7 +12,19 @@ This command will create your project inside in the location that you are curren
 $ gonew myproject
 ```
 
-You can also use the `--gitignore` option to also generate a default `.gitignore` file
+The following options are also available:
+
+`-g` will generate a default `.gitignore` file
 ```bash
-$ gonew --gitignore myproject
+$ gonew  -g myproject
+```
+
+`-r` will generate a `README` file with your project's name
+```bash
+$ gonew  -r myproject
+```
+
+`-p` will generate a file `myproject.go` instead of a `main.go` file. Use this option if you are generating a package instead of an executable
+```bash
+$ gonew  -p myproject
 ```
