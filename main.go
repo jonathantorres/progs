@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -38,7 +39,11 @@ func createPackageFile(path *string) {
 }
 
 func createReadme(path *string) {
-
+	readme := strings.Replace(readmeText, "{project}", *path, -1)
+	err := createFile(*path + "/README.md", []byte(readme))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "there was a problem creating README.md file, %s\n", err)
+	}
 }
 
 func createRootFolder(name *string) {
