@@ -48,29 +48,28 @@ func createRootFolder(name *string) {
 }
 
 func createGitIgnore(path *string) {
-	file, err := os.Create(*path + "/.gitignore")
+	err := createFile(*path + "/.gitignore", []byte(gitignoreText))
 	if err != nil {
-		fmt.Println("Could not create .gitignore file:", err)
-		return
-	}
-	defer file.Close()
-	_, err = file.Write([]byte(gitignoreText))
-	if err != nil {
-		fmt.Println("Could not write code to .gitignore file:", err)
-		return
+		fmt.Fprintf(os.Stderr, "there was a problem creating .gitignore file, %s\n", err)
 	}
 }
 
 func createMain(path *string) {
-	file, err := os.Create(*path + "/main.go")
+	err := createFile(*path + "/main.go", []byte(mainText))
 	if err != nil {
-		fmt.Println("Could not create main.go file:", err)
-		return
+		fmt.Fprintf(os.Stderr, "there was a problem creating main.go file, %s\n", err)
+	}
+}
+
+func createFile(path string, filedata []byte) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
 	}
 	defer file.Close()
-	_, err = file.Write([]byte(mainText))
+	_, err = file.Write(filedata)
 	if err != nil {
-		fmt.Println("Could not write code to main.go file:", err)
-		return
+		return err
 	}
+	return nil
 }
