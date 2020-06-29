@@ -40,7 +40,7 @@ func createPackageFile(path *string) {
 
 func createReadme(path *string) {
 	readme := strings.Replace(readmeText, "{project}", *path, -1)
-	err := createFile(*path + "/README.md", []byte(readme))
+	err := createFile(*path+"/README.md", []byte(readme))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "there was a problem creating README.md file, %s\n", err)
 	}
@@ -53,14 +53,14 @@ func createRootFolder(name *string) {
 }
 
 func createGitIgnore(path *string) {
-	err := createFile(*path + "/.gitignore", []byte(gitignoreText))
+	err := createFile(*path+"/.gitignore", []byte(gitignoreText))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "there was a problem creating .gitignore file, %s\n", err)
 	}
 }
 
 func createMain(path *string) {
-	err := createFile(*path + "/main.go", []byte(mainText))
+	err := createFile(*path+"/main.go", []byte(mainText))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "there was a problem creating main.go file, %s\n", err)
 	}
