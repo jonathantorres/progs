@@ -7,21 +7,38 @@ import (
 )
 
 func main() {
-	var gitignore = flag.Bool("gitignore", false, "Generate a .gitignore file")
+	var gitignore = flag.Bool("g", false, "Generate a .gitignore file")
+	var readme = flag.Bool("r", false, "Generate a README.md file")
+	var isPackage = flag.Bool("p", false, "Generate a package file, instead of a binary")
 	var name string
 	flag.Parse()
 	if len(flag.Args()) == 0 {
-		fmt.Println("usage: gonew [--options] [project name]")
+		fmt.Fprintln(os.Stderr, "usage: gonew [-g -r -p] [project name]")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
 	name = flag.Args()[0]
 	createRootFolder(&name)
-	createMain(&name)
+	if *isPackage {
+		createPackageFile(&name)
+	} else {
+		createMain(&name)
+	}
 	if *gitignore {
 		createGitIgnore(&name)
 	}
+	if *readme {
+		createReadme(&name)
+	}
+}
+
+func createPackageFile(path *string) {
+
+}
+
+func createReadme(path *string) {
+
 }
 
 func createRootFolder(name *string) {
