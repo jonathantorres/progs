@@ -28,5 +28,16 @@ func main() {
 }
 `
 
+var packageText string = `package {project}
+
+import (
+	"fmt"
+)
+
+func init() {
+	fmt.Println("hello world")
+}
+`
+
 var readmeText string = `# {project}
 `

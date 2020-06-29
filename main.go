@@ -35,7 +35,11 @@ func main() {
 }
 
 func createPackageFile(path *string) {
-
+	packageStr := strings.Replace(packageText, "{project}", *path, -1)
+	err := createFile(*path+"/"+*path+".go", []byte(packageStr))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "there was a problem creating %s.go file, %s\n", *path, err)
+	}
 }
 
 func createReadme(path *string) {
