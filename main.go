@@ -52,7 +52,7 @@ func createReadme(path *string) {
 
 func createRootFolder(name *string) {
 	if err := os.Mkdir(*name, 0777); err != nil {
-		fmt.Fprintf(os.Stderr, "directory %s already exists", *name)
+		fmt.Fprintf(os.Stderr, "directory %s already exists\n", *name)
 	}
 }
 
