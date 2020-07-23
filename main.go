@@ -11,10 +11,15 @@ func main() {
 	var gitignore = flag.Bool("g", false, "Generate a .gitignore file")
 	var readme = flag.Bool("r", false, "Generate a README.md file")
 	var isPackage = flag.Bool("p", false, "Generate a package file, instead of a binary")
+	var printVersion = flag.Bool("v", false, "Print gonew's version")
 	var name string
 	flag.Parse()
+	if *printVersion {
+		fmt.Fprintf(os.Stdout, "gonew v%s\n", version)
+		os.Exit(0)
+	}
 	if len(flag.Args()) == 0 {
-		fmt.Fprintln(os.Stderr, "usage: gonew [-g -r -p] [project name]")
+		fmt.Fprintln(os.Stderr, "usage: gonew [-g -r -p -v] [project name]")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
