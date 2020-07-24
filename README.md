@@ -2,6 +2,7 @@
 Simple tool to generate a new go project.
 
 ## Install
+If you have go installed, you can install by running the following command, otherwise you can download the binary for your operating system from the latest release [here](https://github.com/jonathantorres/gonew/releases/tag/v0.1.0).
 ```bash
 $ go get github.com/jonathantorres/gonew
 ```
