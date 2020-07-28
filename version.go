@@ -6,7 +6,7 @@ import (
 )
 
 const version = "0.1.0"
-const nameAndVersion = "fserve v"+version
+const nameAndVersion = "fserve v" + version
 
 func printVersion() {
 	fmt.Println(nameAndVersion)
