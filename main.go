@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 var defaultPort = 9090
@@ -36,8 +37,16 @@ func (handler *ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Reque
 	fmt.Fprintf(res, file)
 }
 
-func serveFile(url *url.URL) (string, error) {
-	return url.Path, nil
+func serveFile(url *url.URL) (*os.File, error) {
+	filename := url.Path
+	if filename[0] == '/' {
+		filename = filename[1:]
+	}
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
 }
 
 func setDefaultHeaders(res http.ResponseWriter) {
