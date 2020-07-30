@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 var defaultPort = 9090
@@ -29,24 +31,41 @@ type ServerHandler struct{}
 
 func (handler *ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	setDefaultHeaders(res)
-	file, err := serveFile(req.URL)
+	file, err := findFile(req.URL)
 	if err != nil {
-		res.WriteHeader(500)
-		fmt.Fprintf(res, "error based response")
+		writeErrorResponse(res, http.StatusNotFound, err.Error())
+		return
 	}
-	fmt.Fprintf(res, file)
+	if _, err = io.Copy(res, file); err != nil {
+		writeErrorResponse(res, http.StatusInternalServerError, err.Error())
+		return
+	}
 }
 
-func serveFile(url *url.URL) (*os.File, error) {
-	filename := url.Path
-	if filename[0] == '/' {
-		filename = filename[1:]
+func findFile(url *url.URL) (*os.File, error) {
+	filepath := url.Path
+	if filepath[0] == '/' {
+		filepath = filepath[1:]
 	}
-	file, err := os.Open(filename)
+	if filepath == "" {
+		filepath = "index.html"
+	} else if strings.HasSuffix(filepath, "/") {
+		filepath = filepath+"index.html"
+	}
+	// TODO: validate the file extension
+	// the extension should be supported
+	// return error if the extension is not supported
+	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
 	return file, nil
+}
+
+func writeErrorResponse(res http.ResponseWriter, statusCode int, msg string) {
+	res.Header().Set("Content-type", "text/html")
+	res.WriteHeader(statusCode)
+	fmt.Fprintf(res, "%s", msg)
 }
 
 func setDefaultHeaders(res http.ResponseWriter) {
