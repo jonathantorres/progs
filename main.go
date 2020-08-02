@@ -36,8 +36,16 @@ func (handler *ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Reque
 		writeErrorResponse(res, http.StatusNotFound, err.Error())
 		return
 	}
-	// TODO: file extension is ok, set the appropriate content type
-	// TODO: use Stat() to get the filename and read the extension from there
+	fileinfo, err := file.Stat()
+	if err != nil {
+		writeErrorResponse(res, http.StatusInternalServerError, err.Error())
+		return
+	}
+	extPieces := strings.Split(fileinfo.Name(), ".")
+	ext := extPieces[len(extPieces)-1]
+	fileType := contentTypes[ext]
+	res.Header().Set("Content-type", fileType.contentType)
+
 	if _, err = io.Copy(res, file); err != nil {
 		writeErrorResponse(res, http.StatusInternalServerError, err.Error())
 		return
