@@ -36,10 +36,58 @@ func (handler *ServerHandler) ServeHTTP(res http.ResponseWriter, req *http.Reque
 		writeErrorResponse(res, http.StatusNotFound, err.Error())
 		return
 	}
+	// TODO: file extension is ok, set the appropriate content type
+	// TODO: use Stat() to get the filename and read the extension from there
 	if _, err = io.Copy(res, file); err != nil {
 		writeErrorResponse(res, http.StatusInternalServerError, err.Error())
 		return
 	}
+}
+
+const (
+	FileTypeText = iota
+	FileTypeBinary
+)
+
+type FileType struct {
+	contentType string
+	fileType    uint
+}
+
+var contentTypes = map[string]FileType{
+	"html": FileType{"text/html", FileTypeText},
+	"htm": FileType{"text/html", FileTypeText},
+	"css": FileType{"text/css", FileTypeText},
+	"md": FileType{"text/markdown", FileTypeText},
+	"txt": FileType{"text/plain", FileTypeText},
+	"xml": FileType{"text/xml", FileTypeText},
+	"js": FileType{"application/javascript", FileTypeText},
+	"json": FileType{"application/json", FileTypeText},
+	"pdf": FileType{"application/pdf", FileTypeBinary},
+	"zip": FileType{"application/zip", FileTypeBinary},
+	"bmp": FileType{"image/bmp", FileTypeBinary},
+	"gif": FileType{"image/gif", FileTypeBinary},
+	"jpg": FileType{"image/jpeg", FileTypeBinary},
+	"jpeg": FileType{"image/jpeg", FileTypeBinary},
+	"ico": FileType{"image/x-icon", FileTypeBinary},
+	"png": FileType{"image/png", FileTypeBinary},
+	"tiff": FileType{"image/tiff", FileTypeBinary},
+	"svg": FileType{"image/svg", FileTypeText},
+	"mp4": FileType{"audio/mp4", FileTypeBinary},
+	// "mp4": FileType{"video/mp4", FileTypeBinary},
+	"mpeg": FileType{"audio/mpeg", FileTypeBinary},
+	// "mpeg": FileType{"video/mpeg", FileTypeBinary},
+	"ogg": FileType{"audio/ogg", FileTypeBinary},
+	// "ogg": FileType{"video/ogg", FileTypeBinary},
+	"quicktime": FileType{"video/quicktime", FileTypeBinary},
+	"ttf": FileType{"font/ttf", FileTypeBinary},
+	"woff": FileType{"font/woff", FileTypeBinary},
+	"woff2": FileType{"font/woff2", FileTypeBinary},
+}
+
+func validateExtension(ext string) bool {
+	_, ok := contentTypes[ext];
+	return ok
 }
 
 func findFile(url *url.URL) (*os.File, error) {
@@ -50,11 +98,13 @@ func findFile(url *url.URL) (*os.File, error) {
 	if filepath == "" {
 		filepath = "index.html"
 	} else if strings.HasSuffix(filepath, "/") {
-		filepath = filepath+"index.html"
+		filepath = filepath + "index.html"
 	}
-	// TODO: validate the file extension
-	// the extension should be supported
-	// return error if the extension is not supported
+	extPieces := strings.Split(filepath, ".")
+	ext := extPieces[len(extPieces)-1]
+	if ok := validateExtension(ext); !ok {
+		return nil, fmt.Errorf("file extension %s is not suppored", ext)
+	}
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
