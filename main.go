@@ -81,6 +81,7 @@ var contentTypes = map[string]FileType{
 	"png": FileType{"image/png", FileTypeBinary},
 	"tiff": FileType{"image/tiff", FileTypeBinary},
 	"svg": FileType{"image/svg", FileTypeText},
+	"mp3": FileType{"audio/mp3", FileTypeBinary},
 	"mp4": FileType{"audio/mp4", FileTypeBinary},
 	// "mp4": FileType{"video/mp4", FileTypeBinary},
 	"mpeg": FileType{"audio/mpeg", FileTypeBinary},
