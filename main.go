@@ -27,52 +27,69 @@ func main() {
 	name = flag.Args()[0]
 	createRootFolder(&name)
 	if *isPackage {
-		createPackageFile(&name)
+		if err := createPackageFile(&name); err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
 	} else {
-		createMain(&name)
+		if err := createMain(&name); err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 	if *gitignore {
-		createGitIgnore(&name)
+		if err := createGitIgnore(&name); err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 	if *readme {
-		createReadme(&name)
+		if err := createReadme(&name); err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 }
 
-func createPackageFile(path *string) {
+func createPackageFile(path *string) error {
 	packageStr := strings.Replace(packageText, "{project}", *path, -1)
 	err := createFile(*path+"/"+*path+".go", []byte(packageStr))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "there was a problem creating %s.go file, %s\n", *path, err)
+		return fmt.Errorf("there was a problem creating %s.go file, %s\n", *path, err)
 	}
+	return nil
 }
 
-func createReadme(path *string) {
+func createReadme(path *string) error {
 	readme := strings.Replace(readmeText, "{project}", *path, -1)
 	err := createFile(*path+"/README.md", []byte(readme))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "there was a problem creating README.md file, %s\n", err)
+		fmt.Errorf("there was a problem creating README.md file, %s\n", err)
 	}
+	return nil
 }
 
-func createRootFolder(name *string) {
+func createRootFolder(name *string) error {
 	if err := os.Mkdir(*name, 0777); err != nil {
-		fmt.Fprintf(os.Stderr, "directory %s already exists\n", *name)
+		return fmt.Errorf("directory %s already exists\n", *name)
 	}
+	return nil
 }
 
-func createGitIgnore(path *string) {
+func createGitIgnore(path *string) error {
 	err := createFile(*path+"/.gitignore", []byte(gitignoreText))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "there was a problem creating .gitignore file, %s\n", err)
+		return fmt.Errorf("there was a problem creating .gitignore file, %s\n", err)
 	}
+	return nil
 }
 
-func createMain(path *string) {
+func createMain(path *string) error {
 	err := createFile(*path+"/main.go", []byte(mainText))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "there was a problem creating main.go file, %s\n", err)
+		return fmt.Errorf("there was a problem creating main.go file, %s\n", err)
 	}
+	return nil
 }
 
 func createFile(path string, filedata []byte) error {
