@@ -9,8 +9,13 @@ import (
 // starts the server process and handles every request sent to it
 // handles server start, restart and shutdown
 
+const (
+	name = "localhost"
+	port = 8010
+)
+
 func Start() error {
-	l, err := net.Listen("tcp", "localhost:8010")
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", name, port))
 	if err != nil {
 		return err
 	}
