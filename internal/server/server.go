@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
-	"os"
 )
 
 // starts the server process and handles every request sent to it
@@ -22,7 +22,7 @@ func Start() error {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n")
+			log.Print(err)
 			continue
 		}
 		go handleConn(conn)
@@ -36,12 +36,12 @@ func handleConn(conn net.Conn) {
 	req := make([]byte, 512)
 	_, err := conn.Read(req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n")
+		log.Print(err)
 		return
 	}
 	_, err = conn.Write([]byte(msg))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n")
+		log.Print(err)
 		return
 	}
 	conn.Close()

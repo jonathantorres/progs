@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/jonathantorres/voy/internal/conf"
@@ -20,11 +21,9 @@ func main() {
 		os.Exit(0)
 	}
 	if err := conf.Validate(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	if err := server.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
