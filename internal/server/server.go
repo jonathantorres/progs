@@ -10,8 +10,9 @@ import (
 // handles server start, restart and shutdown
 
 const (
-	name = "localhost"
-	port = 8010
+	name     = "localhost"
+	port     = 8010
+	buffSize = 1024
 )
 
 func Start() error {
@@ -31,18 +32,30 @@ func Start() error {
 	return nil
 }
 
+func newRequest(reqData []byte) string {
+	return "request"
+}
+
+func newResponse(req string) string {
+	return "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nServer: voy\r\n\r\n<p>Hola!</p>"
+}
+
 func handleConn(conn net.Conn) {
-	msg := "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nServer: voy\r\n\r\n<p>Hola!</p>"
-	req := make([]byte, 512)
-	_, err := conn.Read(req)
+	reqData := make([]byte, buffSize)
+	_, err := conn.Read(reqData)
 	if err != nil {
-		log.Print(err)
-		return
+		log.Fatal(err)
 	}
-	_, err = conn.Write([]byte(msg))
+	// build the req object based on these bytes of data
+	// should we return an error here?
+	// or should the server just send a specific response?
+	req := newRequest(reqData)
+
+	// build the response string and return it
+	res := newResponse(req)
+	_, err = conn.Write([]byte(res))
 	if err != nil {
-		log.Print(err)
-		return
+		log.Fatal(err)
 	}
 	conn.Close()
 }
