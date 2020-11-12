@@ -42,13 +42,17 @@ func newRequest(reqData []byte) *Request {
 	if err != nil {
 		return nil
 	}
-	// TODO: parse headers
+	headers, err := parseHeaders(reqData)
+	if err != nil {
+		return nil
+	}
 	// TODO: parse body (if any)
 	return &Request{
 		method:           method,
 		uri:              uri,
 		httpVersionMajor: major,
 		httpVersionMinor: minor,
+		headers:          headers,
 	}
 }
 
