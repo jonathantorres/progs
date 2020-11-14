@@ -37,21 +37,21 @@ func Start() error {
 	return nil
 }
 
-func newRequest(reqData []byte) *Request {
+func newRequest(reqData []byte) (*Request, error) {
 	method, uri, major, minor, err := parseRequestLine(reqData)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	headers, err := parseHeaders(reqData)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	body, err := parseBody(reqData)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &Request{
+	req := &Request{
 		method:           method,
 		uri:              uri,
 		httpVersionMajor: major,
@@ -59,6 +59,7 @@ func newRequest(reqData []byte) *Request {
 		headers:          headers,
 		body:             body,
 	}
+	return req, nil
 }
 
 func parseRequestLine(reqData []byte) (string, string, int, int, error) {
