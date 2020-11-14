@@ -12,6 +12,14 @@ Host: www.example.com
 Server: voy v0.1.0
 Connection: close
 `
+var pay3 = `POST /user/create HTTP/1.1
+Host: www.example.com
+Server: voy v0.1.0
+Connection: close
+Content-Length: 41
+
+user=foo&password=bar&email=test@test.com
+`
 
 var cases = []struct {
 	payload          string
@@ -22,6 +30,7 @@ var cases = []struct {
 }{
 	{pay1, "GET", "/", 1, 1},
 	{pay2, "GET", "/foo/bar", 1, 1},
+	{pay3, "POST", "/user/create", 1, 1},
 }
 
 func TestRequestLine(t *testing.T) {
