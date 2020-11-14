@@ -189,7 +189,10 @@ func handleConn(conn net.Conn) {
 	// build the req object based on these bytes of data
 	// should we return an error here?
 	// or should the server just send a specific response?
-	req := newRequest(reqData)
+	req, err := newRequest(reqData)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// build the response string and return it
 	res := newResponse(req)

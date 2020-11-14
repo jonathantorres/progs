@@ -57,7 +57,10 @@ var cases = []struct {
 
 func TestRequestLine(t *testing.T) {
 	for _, c := range cases {
-		req := newRequest([]byte(c.payload))
+		req, err := newRequest([]byte(c.payload))
+		if err != nil {
+			t.Errorf(err.Error())
+		}
 		if req.method != c.method {
 			t.Errorf("req method is %s but it should be %s", req.method, c.method)
 		}
@@ -75,7 +78,10 @@ func TestRequestLine(t *testing.T) {
 
 func TestParsingOfHeaders(t *testing.T) {
 	for i, c := range cases {
-		req := newRequest([]byte(c.payload))
+		req, err := newRequest([]byte(c.payload))
+		if err != nil {
+			t.Errorf(err.Error())
+		}
 		if !reflect.DeepEqual(req.headers, c.headers) {
 			t.Errorf("headers from payload#%d are not equal", i+1)
 		}
@@ -84,7 +90,10 @@ func TestParsingOfHeaders(t *testing.T) {
 
 func TestParsingOfBody(t *testing.T) {
 	for i, c := range cases {
-		req := newRequest([]byte(c.payload))
+		req, err := newRequest([]byte(c.payload))
+		if err != nil {
+			t.Errorf(err.Error())
+		}
 		if !reflect.DeepEqual(req.body, c.body) {
 			t.Errorf("request body from payload#%d is not equal", i+1)
 		}
