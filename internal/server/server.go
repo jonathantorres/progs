@@ -37,6 +37,10 @@ func Start() error {
 	return nil
 }
 
+func parseHeaders(reqData []byte) (map[string]string, error) {
+	return nil, nil
+}
+
 func newRequest(reqData []byte) *Request {
 	method, uri, major, minor, err := parseRequestLine(reqData)
 	if err != nil {
