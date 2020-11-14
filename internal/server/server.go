@@ -70,8 +70,8 @@ func parseRequestLine(reqData []byte) (string, string, int, int, error) {
 		tok = scanner.Bytes()
 		break // only read the first line
 	}
-	if scanner.Err() != nil {
-		return "", "", 0, 0, scanner.Err()
+	if err := scanner.Err(); err != nil {
+		return "", "", 0, 0, err
 	}
 
 	parts := bytes.Split(tok, []byte{byte(' ')})
