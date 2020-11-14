@@ -63,10 +63,17 @@ func newRequest(reqData []byte) *Request {
 func parseRequestLine(reqData []byte) (string, string, int, int, error) {
 	var method, uri string
 	var major, minor int
-	_, tok, err := bufio.ScanLines(reqData, false)
-	if err != nil {
-		return "", "", 0, 0, err
+	var tok []byte
+	r := bytes.NewReader(reqData)
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		tok = scanner.Bytes()
+		break // only read the first line
 	}
+	if scanner.Err() != nil {
+		return "", "", 0, 0, scanner.Err()
+	}
+
 	parts := bytes.Split(tok, []byte{byte(' ')})
 	if len(parts) != 3 {
 		return "", "", 0, 0, errors.New("invalid request line")
