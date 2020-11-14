@@ -112,7 +112,7 @@ func parseHeaders(reqData []byte) (map[string]string, error) {
 		}
 		i++
 	}
-	if scanner.Err() != nil {
+	if err := scanner.Err(); err != nil {
 		return nil, scanner.Err()
 	}
 	return headers, nil
