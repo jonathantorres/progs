@@ -37,10 +37,6 @@ func Start() error {
 	return nil
 }
 
-func parseHeaders(reqData []byte) (map[string]string, error) {
-	return nil, nil
-}
-
 func newRequest(reqData []byte) *Request {
 	method, uri, major, minor, err := parseRequestLine(reqData)
 	if err != nil {
@@ -90,6 +86,36 @@ func parseRequestLine(reqData []byte) (string, string, int, int, error) {
 		}
 	}
 	return method, uri, major, minor, nil
+}
+
+func parseHeaders(reqData []byte) (map[string]string, error) {
+	headers := make(map[string]string)
+	var tok []byte
+	r := bytes.NewReader(reqData)
+	scanner := bufio.NewScanner(r)
+	i := 0
+	for scanner.Scan() {
+		tok = scanner.Bytes()
+		if i == 0 {
+			i++
+			continue // skip the request line
+		}
+		if len(tok) == 0 {
+			// we found an empty line, the headers end here
+			break
+		}
+		parts := bytes.Split(tok, []byte(":"))
+		if len(parts) == 2 {
+			key := string(bytes.TrimSpace(parts[0]))
+			val := string(bytes.TrimSpace(parts[1]))
+			headers[key] = val
+		}
+		i++
+	}
+	if scanner.Err() != nil {
+		return nil, scanner.Err()
+	}
+	return headers, nil
 }
 
 func newResponse(req *Request) string {

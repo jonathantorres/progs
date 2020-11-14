@@ -1,17 +1,26 @@
 package server
 
 import (
+	"reflect"
 	"testing"
 )
 
 var pay1 = `GET / HTTP/1.1
 Host: www.example.com
 `
+var pay1Headers = map[string]string{
+	"Host": "www.example.com",
+}
 var pay2 = `GET /foo/bar HTTP/1.1
 Host: www.example.com
 Server: voy v0.1.0
 Connection: close
 `
+var pay2Headers = map[string]string{
+	"Host":       "www.example.com",
+	"Server":     "voy v0.1.0",
+	"Connection": "close",
+}
 var pay3 = `POST /user/create HTTP/1.1
 Host: www.example.com
 Server: voy v0.1.0
@@ -20,6 +29,12 @@ Content-Length: 41
 
 user=foo&password=bar&email=test@test.com
 `
+var pay3Headers = map[string]string{
+	"Host":           "www.example.com",
+	"Server":         "voy v0.1.0",
+	"Connection":     "close",
+	"Content-Length": "41",
+}
 
 var cases = []struct {
 	payload          string
@@ -27,10 +42,11 @@ var cases = []struct {
 	uri              string
 	httpVersionMajor int
 	httpVersionMinor int
+	headers          map[string]string
 }{
-	{pay1, "GET", "/", 1, 1},
-	{pay2, "GET", "/foo/bar", 1, 1},
-	{pay3, "POST", "/user/create", 1, 1},
+	{pay1, "GET", "/", 1, 1, pay1Headers},
+	{pay2, "GET", "/foo/bar", 1, 1, pay2Headers},
+	{pay3, "POST", "/user/create", 1, 1, pay3Headers},
 }
 
 func TestRequestLine(t *testing.T) {
@@ -47,6 +63,15 @@ func TestRequestLine(t *testing.T) {
 		}
 		if req.httpVersionMinor != c.httpVersionMinor {
 			t.Errorf("req minor version is %d but it should be %d", req.httpVersionMinor, c.httpVersionMinor)
+		}
+	}
+}
+
+func TestParsingOfHeaders(t *testing.T) {
+	for i, c := range cases {
+		req := newRequest([]byte(c.payload))
+		if !reflect.DeepEqual(req.headers, c.headers) {
+			t.Errorf("headers from payload#%d are not equal", i+1)
 		}
 	}
 }
