@@ -46,13 +46,18 @@ func newRequest(reqData []byte) *Request {
 	if err != nil {
 		return nil
 	}
-	// TODO: parse body (if any)
+	body, err := parseBody(reqData)
+	if err != nil {
+		return nil
+	}
+
 	return &Request{
 		method:           method,
 		uri:              uri,
 		httpVersionMajor: major,
 		httpVersionMinor: minor,
 		headers:          headers,
+		body:             body,
 	}
 }
 
@@ -116,6 +121,40 @@ func parseHeaders(reqData []byte) (map[string]string, error) {
 		return nil, scanner.Err()
 	}
 	return headers, nil
+}
+
+func parseBody(reqData []byte) ([]byte, error) {
+	var body []byte = nil
+	var tok []byte
+	r := bytes.NewReader(reqData)
+	scanner := bufio.NewScanner(r)
+	i := 0
+	foundBody := false
+	for scanner.Scan() {
+		tok = scanner.Bytes()
+		if i == 0 {
+			i++
+			continue // skip the request line
+		}
+		if len(tok) == 0 {
+			// we found an empty line, the headers end here
+			// and the body starts
+			foundBody = true
+			continue
+		}
+		if foundBody {
+			// this line is part of the body
+			if body == nil {
+				body = make([]byte, 0)
+			}
+			body = append(body, tok...)
+		}
+		i++
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 func newResponse(req *Request) string {
