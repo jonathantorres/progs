@@ -35,27 +35,29 @@ func Start() error {
 }
 
 func handleConn(conn net.Conn) {
+	defer conn.Close()
 	reqData := make([]byte, buffSize)
 	_, err := conn.Read(reqData)
 	if err != nil {
-		log.Fatal(err)
+		conn.Write(http.BuildResponseBytes(http.SendServerError()))
+		log.Println(err)
+		return
 	}
 	// build the req object based on these bytes of data
 	// should we return an error here?
 	// or should the server just send a specific response?
 	req, err := http.NewRequest(reqData)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		// TODO: send appropriate error response
+		return
 	}
 
 	// build the response string and return it
-	res, err := http.NewResponse(req)
-	if err != nil {
-		log.Fatal(err)
-	}
+	res := http.NewResponse(req)
 	_, err = conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
-		log.Fatal(err)
+		conn.Write(http.BuildResponseBytes(http.SendServerError()))
+		log.Println(err)
 	}
-	conn.Close()
 }
