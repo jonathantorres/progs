@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"reflect"
@@ -57,7 +57,7 @@ var cases = []struct {
 
 func TestRequestLine(t *testing.T) {
 	for _, c := range cases {
-		req, err := newRequest([]byte(c.payload))
+		req, err := NewRequest([]byte(c.payload))
 		if err != nil {
 			t.Errorf(err.Error())
 		}
@@ -78,7 +78,7 @@ func TestRequestLine(t *testing.T) {
 
 func TestParsingOfHeaders(t *testing.T) {
 	for i, c := range cases {
-		req, err := newRequest([]byte(c.payload))
+		req, err := NewRequest([]byte(c.payload))
 		if err != nil {
 			t.Errorf(err.Error())
 		}
@@ -90,7 +90,7 @@ func TestParsingOfHeaders(t *testing.T) {
 
 func TestParsingOfBody(t *testing.T) {
 	for i, c := range cases {
-		req, err := newRequest([]byte(c.payload))
+		req, err := NewRequest([]byte(c.payload))
 		if err != nil {
 			t.Errorf(err.Error())
 		}
