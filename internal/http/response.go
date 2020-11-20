@@ -31,7 +31,6 @@ func NewResponse(req *Request) *Response {
 		body:             body,
 	}
 	return res
-	// return "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nServer: voy\r\n\r\n<p>Hola!</p>"
 }
 
 func BuildResponseBytes(res *Response) []byte {
@@ -46,17 +45,18 @@ func BuildResponseBytes(res *Response) []byte {
 	return resBytes
 }
 
-func SendServerError() *Response {
+func SendErrorResponse(code int, msg string) *Response {
 	headers := make(map[string]string)
 	addDefaultResponseHeaders(headers)
+	headers["Content-Type"] = "text/html"
 	headers["Connection"] = "close"
 	return &Response{
 		httpVersionMajor: 1,
 		httpVersionMinor: 1,
-		code:             500,
-		message:          "Internal Server Error",
+		code:             code,
+		message:          msg,
 		headers:          headers,
-		body:             []byte(fmt.Sprintf("%d %s", 500, "Internal Server Error")),
+		body:             []byte(fmt.Sprintf("%d %s", code, msg)),
 	}
 }
 

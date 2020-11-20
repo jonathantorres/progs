@@ -17,6 +17,8 @@ type Request struct {
 	body             []byte
 }
 
+var ErrInvalidRequestLine = errors.New("invalid request line")
+
 func NewRequest(reqData []byte) (*Request, error) {
 	method, uri, major, minor, err := parseRequestLine(reqData)
 	if err != nil {
@@ -58,7 +60,7 @@ func parseRequestLine(reqData []byte) (string, string, int, int, error) {
 
 	parts := bytes.Split(tok, []byte{byte(' ')})
 	if len(parts) != 3 {
-		return "", "", 0, 0, errors.New("invalid request line")
+		return "", "", 0, 0, ErrInvalidRequestLine
 	}
 	method = string(parts[0])
 	uri = string(parts[1])
