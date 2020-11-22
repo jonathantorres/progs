@@ -23,8 +23,8 @@ func NewResponse(req *Request) *Response {
 	addDefaultResponseHeaders(headers)
 	headers["Content-Type"] = "text/html" // TODO
 	res := &Response{
-		httpVersionMinor: req.httpVersionMinor,
-		httpVersionMajor: req.httpVersionMajor,
+		httpVersionMinor: HttpVersionMinor,
+		httpVersionMajor: HttpVersionMajor,
 		code:             200,  // TODO
 		message:          "OK", // TODO
 		headers:          headers,
@@ -51,8 +51,8 @@ func SendErrorResponse(code int, msg string) *Response {
 	headers["Content-Type"] = "text/html"
 	headers["Connection"] = "close"
 	return &Response{
-		httpVersionMajor: 1,
-		httpVersionMinor: 1,
+		httpVersionMajor: HttpVersionMinor,
+		httpVersionMinor: HttpVersionMajor,
 		code:             code,
 		message:          msg,
 		headers:          headers,

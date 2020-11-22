@@ -3,6 +3,11 @@ package http
 import "errors"
 
 const (
+	HttpVersionMajor = 1
+	HttpVersionMinor = 1
+)
+
+const (
 	StatusContinue          = 100
 	StatusSwichingProtocols = 101
 	StatusProcessing        = 102
