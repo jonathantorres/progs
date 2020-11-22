@@ -18,13 +18,6 @@ const (
 	buffSize = 1024
 )
 
-var (
-	serverErrResponseCode = 500
-	clientErrResponseCode = 400
-	serverErrResponseMsg  = "Internal Server Error"
-	clientErrResponseMsg  = "Bad Request"
-)
-
 func Start() error {
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", name, port))
 	if err != nil {
@@ -47,16 +40,22 @@ func handleConn(conn net.Conn) {
 	reqData := make([]byte, buffSize)
 	_, err := conn.Read(reqData)
 	if err != nil {
-		conn.Write(http.BuildResponseBytes(http.SendErrorResponse(serverErrResponseCode, serverErrResponseMsg)))
+		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
+		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
+		conn.Write(bytes)
 		log.Println(err)
 		return
 	}
 	req, err := http.NewRequest(reqData)
 	if err != nil {
 		if errors.Is(err, http.ErrInvalidRequestLine) {
-			conn.Write(http.BuildResponseBytes(http.SendErrorResponse(clientErrResponseCode, clientErrResponseMsg)))
+			msg, _ := http.GetStatusCodeMessage(http.StatusBadRequest)
+			bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusBadRequest, msg))
+			conn.Write(bytes)
 		} else {
-			conn.Write(http.BuildResponseBytes(http.SendErrorResponse(serverErrResponseCode, serverErrResponseMsg)))
+			msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
+			bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
+			conn.Write(bytes)
 		}
 		log.Println(err)
 		return
@@ -65,7 +64,9 @@ func handleConn(conn net.Conn) {
 	res := http.NewResponse(req)
 	_, err = conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
-		conn.Write(http.BuildResponseBytes(http.SendErrorResponse(serverErrResponseCode, serverErrResponseMsg)))
+		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
+		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
+		conn.Write(bytes)
 		log.Println(err)
 	}
 }
