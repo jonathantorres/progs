@@ -61,7 +61,13 @@ func handleConn(conn net.Conn) {
 		return
 	}
 
-	res := http.NewResponse(req)
+	code, headers, body, err := processRequest(req)
+	if err != nil {
+		// TODO: Handle any errors here :)
+		log.Println(err)
+	}
+
+	res := http.NewResponse(code, headers, body)
 	_, err = conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
 		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
@@ -69,4 +75,14 @@ func handleConn(conn net.Conn) {
 		conn.Write(bytes)
 		log.Println(err)
 	}
+}
+
+func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
+	headers := make(map[string]string)
+	body := make([]byte, 0)
+	code := 200 // TODO
+
+	body = append(body, []byte("Hello, world")...) // TODO
+	headers["Content-Type"] = "text/html"          // TODO
+	return code, headers, body, nil
 }

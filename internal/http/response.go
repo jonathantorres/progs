@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jonathantorres/voy/internal/voy"
 )
@@ -15,18 +16,18 @@ type Response struct {
 	body             []byte
 }
 
-func NewResponse(req *Request) *Response {
-	headers := make(map[string]string)
-	body := make([]byte, 0)
-
-	body = append(body, []byte("Hola!")...) // TODO
+func NewResponse(code int, headers map[string]string, body []byte) *Response {
+	msg, err := GetStatusCodeMessage(code)
+	if err != nil {
+		// TODO: handle errors better here :)
+		log.Println(err)
+	}
 	addDefaultResponseHeaders(headers)
-	headers["Content-Type"] = "text/html" // TODO
 	res := &Response{
 		httpVersionMinor: HTTPVersionMinor,
 		httpVersionMajor: HTTPVersionMajor,
-		code:             200,  // TODO
-		message:          "OK", // TODO
+		code:             code,
+		message:          msg,
 		headers:          headers,
 		body:             body,
 	}
