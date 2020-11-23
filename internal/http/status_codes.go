@@ -3,15 +3,15 @@ package http
 import "errors"
 
 const (
-	HttpVersionMajor = 1
-	HttpVersionMinor = 1
+	HTTPVersionMajor = 1
+	HTTPVersionMinor = 1
 )
 
 const (
-	StatusContinue          = 100
-	StatusSwichingProtocols = 101
-	StatusProcessing        = 102
-	StatusEarlyHints        = 103
+	StatusContinue           = 100
+	StatusSwitchingProtocols = 101
+	StatusProcessing         = 102
+	StatusEarlyHints         = 103
 
 	StatusOk                          = 200
 	StatusCreated                     = 201
@@ -22,7 +22,7 @@ const (
 	StatusPartialContent              = 206
 	StatusMultiStatus                 = 207
 	StatusAlreadyReported             = 208
-	StatusImUsed                      = 226
+	StatusIMUsed                      = 226
 
 	StatusMultipleChoices   = 300
 	StatusMovedPermanently  = 301
@@ -48,7 +48,7 @@ const (
 	StatusLengthRequired              = 411
 	StatusPreconditionFailed          = 412
 	StatusPayloadTooLarge             = 413
-	StatusUriTooLong                  = 414
+	StatusURITooLong                  = 414
 	StatusUnsupportedMediaType        = 415
 	StatusRangeNotSatisfiable         = 416
 	StatusExpectationFailed           = 417
@@ -69,7 +69,7 @@ const (
 	StatusBadGateway                    = 502
 	StatusServiceUnavailable            = 503
 	StatusGatewayTimeout                = 504
-	StatusHttpVersionNotSupported       = 505
+	StatusHTTPVersionNotSupported       = 505
 	StatusVariantAlsoNegotiates         = 506
 	StatusInsufficientStorage           = 507
 	StatusLoopDetected                  = 508
@@ -78,10 +78,10 @@ const (
 )
 
 var statusCodes = map[int]string{
-	StatusContinue:          "Continue",
-	StatusSwichingProtocols: "Swiching Protocols",
-	StatusProcessing:        "Processing",
-	StatusEarlyHints:        "EarlyHints",
+	StatusContinue:           "Continue",
+	StatusSwitchingProtocols: "Switching Protocols",
+	StatusProcessing:         "Processing",
+	StatusEarlyHints:         "EarlyHints",
 
 	StatusOk:                          "OK",
 	StatusCreated:                     "Created",
@@ -92,7 +92,7 @@ var statusCodes = map[int]string{
 	StatusPartialContent:              "Partial Content",
 	StatusMultiStatus:                 "Multi-Status",
 	StatusAlreadyReported:             "Already Reported",
-	StatusImUsed:                      "IM Used",
+	StatusIMUsed:                      "IM Used",
 
 	StatusMultipleChoices:   "Multiple Choices",
 	StatusMovedPermanently:  "Moved Permanently",
@@ -118,7 +118,7 @@ var statusCodes = map[int]string{
 	StatusLengthRequired:              "Length Required",
 	StatusPreconditionFailed:          "Precondition Failed",
 	StatusPayloadTooLarge:             "Payload Too Large",
-	StatusUriTooLong:                  "URI Too Long ",
+	StatusURITooLong:                  "URI Too Long ",
 	StatusUnsupportedMediaType:        "Unsupported Media Type",
 	StatusRangeNotSatisfiable:         "Range Not Satisfiable ",
 	StatusExpectationFailed:           "Expectation Failed",
@@ -139,7 +139,7 @@ var statusCodes = map[int]string{
 	StatusBadGateway:                    "Bad Gateway",
 	StatusServiceUnavailable:            "Service Unavailable",
 	StatusGatewayTimeout:                "Gateway Timeout",
-	StatusHttpVersionNotSupported:       "HTTP Version Not Supported",
+	StatusHTTPVersionNotSupported:       "HTTP Version Not Supported",
 	StatusVariantAlsoNegotiates:         "Variant Also Negotiates",
 	StatusInsufficientStorage:           "Insufficient Storage",
 	StatusLoopDetected:                  "Loop Detected",
