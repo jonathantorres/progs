@@ -19,7 +19,7 @@ func main() {
 		fmt.Fprintf(os.Stdout, "voy server v%s\n", voy.Version)
 		os.Exit(0)
 	}
-	if err := conf.Validate(); err != nil {
+	if err := conf.Load(); err != nil {
 		log.Fatal(err)
 	}
 	if err := server.Start(); err != nil {
