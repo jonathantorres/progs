@@ -1,0 +1,20 @@
+name = localhost
+root = /var/www/localhost
+port = 80,443
+user = www-data
+group = www-data
+index = index.html,index.htm
+error_page = error.html
+error_page_404 = 404.html
+error_log = /etc/log/voy/errors.log
+access_log = /etc/log/voy/access.log
+
+vhost {
+    name = mydomain.com
+    port = 8081
+    root = /var/www/mydomain.com/public
+    index = index.html
+    error_page = error.html
+    error_log = /etc/log/voy/mydomain.com.log
+    access_log = /etc/log/voy/mydomain.com.log
+}
