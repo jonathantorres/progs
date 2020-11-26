@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/jonathantorres/voy/internal/conf"
 	"github.com/jonathantorres/voy/internal/http"
 )
 
@@ -18,7 +19,9 @@ const (
 	buffSize = 1024
 )
 
-func Start() error {
+func Start(conf *conf.Conf) error {
+	// TODO: use conf to load configuration stuff
+	// the default server and all of the specified virtual hosts
 	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", name, port))
 	if err != nil {
 		return err

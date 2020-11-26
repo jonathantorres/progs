@@ -3,7 +3,6 @@ package conf
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 )
@@ -36,29 +35,28 @@ type ErrorPage struct {
 // or specified as a command line param
 var confFile = "./voy.conf"
 
-func Load() error {
+func Load() (*Conf, error) {
 	file, err := openAndStripComments(confFile)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 	file, err = parseIncludes(file)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 	err = checkForSyntaxErrors(file)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 	conf, err := buildServerConf(file)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
-	fmt.Println(conf)
-	return nil
+	return conf, nil
 }
 
 func (c *Conf) addOption(opName string, opValue string) {
