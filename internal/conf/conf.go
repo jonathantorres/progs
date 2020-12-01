@@ -207,7 +207,15 @@ func parsePortOptions(ports string) []int {
 }
 
 func parseIndexOptions(pages string) []string {
-	return nil
+	pagesSli := strings.Split(pages, ",")
+	if len(pagesSli) == 0 {
+		return nil
+	}
+	parsedPages := make([]string, 0)
+	for _, p := range pagesSli {
+		parsedPages = append(parsedPages, p)
+	}
+	return parsedPages
 }
 
 func parseErrorPageOptions(pages string) []ErrorPage {
