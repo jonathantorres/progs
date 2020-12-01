@@ -31,11 +31,7 @@ type ErrorPage struct {
 	page string
 }
 
-// TODO: must come from a standard location
-// or specified as a command line param
-var confFile = "./voy.conf"
-
-func Load() (*Conf, error) {
+func Load(confFile string) (*Conf, error) {
 	file, err := openAndStripComments(confFile)
 	if err != nil {
 		log.Println(err)

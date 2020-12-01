@@ -13,13 +13,17 @@ import (
 
 var versionFlag = flag.Bool("version", false, "print current version")
 
+// TODO: must come from a standard location
+// or specified as a command line param
+var confFile = "./voy.conf"
+
 func main() {
 	flag.Parse()
 	if *versionFlag {
 		fmt.Fprintf(os.Stdout, "voy server v%s\n", voy.Version)
 		os.Exit(0)
 	}
-	c, err := conf.Load()
+	c, err := conf.Load(confFile)
 	if err != nil {
 		log.Fatal(err)
 	}
