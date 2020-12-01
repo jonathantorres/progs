@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // This is supposed to validate, test and parse the configuration file
@@ -97,8 +99,6 @@ func (s *ServerConf) addOption(opName string, opValue string) {
 }
 
 func buildServerConf(file []byte) (*Conf, error) {
-	// TODO: build the Conf structure based on the correctly
-	// loaded configuration file
 	r := bytes.NewReader(file)
 	scanner := bufio.NewScanner(r)
 	insideVhost := false
@@ -190,7 +190,20 @@ scan:
 }
 
 func parsePortOptions(ports string) []int {
-	return nil
+	portsStr := strings.Split(ports, ",")
+	if len(portsStr) == 0 {
+		return nil
+	}
+	parsedPorts := make([]int, 0)
+	for _, p := range portsStr {
+		pInt, err := strconv.Atoi(p)
+		if err != nil {
+			return nil
+			log.Println(err)
+		}
+		parsedPorts = append(parsedPorts, pInt)
+	}
+	return parsedPorts
 }
 
 func parseIndexOptions(pages string) []string {

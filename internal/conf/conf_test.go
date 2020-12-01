@@ -44,31 +44,29 @@ func TestSyntaxErrorsAreFound(t *testing.T) {
 }
 
 func TestServerConfIsBuilt(t *testing.T) {
-	defServer := ServerConf{
-		name:       "localhost",
-		root:       "/var/www/localhost",
-		ports:      nil,
-		indexPages: nil,
-		errorPages: nil,
-		errorLog:   "/etc/log/voy/errors.log",
-		accessLog:  "/etc/log/voy/access.log",
-	}
-	vhosts := []ServerConf{
-		{
-			name:       "mydomain.com",
-			root:       "/var/www/mydomain.com/public",
-			ports:      nil,
+	wantConf := Conf{
+		user:  "www-data",
+		group: "www-data",
+		defaultServer: &ServerConf{
+			name:       "localhost",
+			root:       "/var/www/localhost",
+			ports:      []int{80, 443},
 			indexPages: nil,
 			errorPages: nil,
-			errorLog:   "/etc/log/voy/mydomain.com.log",
-			accessLog:  "/etc/log/voy/mydomain.com.log",
+			errorLog:   "/etc/log/voy/errors.log",
+			accessLog:  "/etc/log/voy/access.log",
 		},
-	}
-	wantConf := Conf{
-		user:          "www-data",
-		group:         "www-data",
-		defaultServer: &defServer,
-		vhosts:        vhosts,
+		vhosts: []ServerConf{
+			{
+				name:       "mydomain.com",
+				root:       "/var/www/mydomain.com/public",
+				ports:      []int{8081},
+				indexPages: nil,
+				errorPages: nil,
+				errorLog:   "/etc/log/voy/mydomain.com.log",
+				accessLog:  "/etc/log/voy/mydomain.com.log",
+			},
+		},
 	}
 	cases := []struct {
 		confFile string
