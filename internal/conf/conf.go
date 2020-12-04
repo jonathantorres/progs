@@ -87,9 +87,9 @@ func (s *ServerConf) addOption(opName string, opValue string) {
 	case rootOption:
 		s.root = opValue
 	case portOption:
-		s.ports = parsePortOptions(opValue)
+		s.parsePortOptions(opValue)
 	case indexOption:
-		s.indexPages = parseIndexOptions(opValue)
+		s.parseIndexOptions(opValue)
 	case errorLogOption:
 		s.errorLog = opValue
 	case accessLogOption:
@@ -99,6 +99,33 @@ func (s *ServerConf) addOption(opName string, opValue string) {
 	// handle error pages
 	if strings.Contains(opName, errorPageOption) {
 		s.parseErrorPageOptions(opName, opValue)
+	}
+}
+
+func (s *ServerConf) parsePortOptions(ports string) {
+	portsStr := strings.Split(ports, ",")
+	if len(portsStr) == 0 {
+		return
+	}
+	s.ports = make([]int, 0)
+	for _, p := range portsStr {
+		pInt, err := strconv.Atoi(p)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		s.ports = append(s.ports, pInt)
+	}
+}
+
+func (s *ServerConf) parseIndexOptions(pages string) {
+	pagesSli := strings.Split(pages, ",")
+	if len(pagesSli) == 0 {
+		return
+	}
+	s.indexPages = make([]string, 0)
+	for _, p := range pagesSli {
+		s.indexPages = append(s.indexPages, p)
 	}
 }
 
@@ -222,33 +249,4 @@ scan:
 		return nil, err
 	}
 	return file, nil
-}
-
-func parsePortOptions(ports string) []int {
-	portsStr := strings.Split(ports, ",")
-	if len(portsStr) == 0 {
-		return nil
-	}
-	parsedPorts := make([]int, 0)
-	for _, p := range portsStr {
-		pInt, err := strconv.Atoi(p)
-		if err != nil {
-			return nil
-			log.Println(err)
-		}
-		parsedPorts = append(parsedPorts, pInt)
-	}
-	return parsedPorts
-}
-
-func parseIndexOptions(pages string) []string {
-	pagesSli := strings.Split(pages, ",")
-	if len(pagesSli) == 0 {
-		return nil
-	}
-	parsedPages := make([]string, 0)
-	for _, p := range pagesSli {
-		parsedPages = append(parsedPages, p)
-	}
-	return parsedPages
 }
