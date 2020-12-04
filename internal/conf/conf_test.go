@@ -52,9 +52,18 @@ func TestServerConfIsBuilt(t *testing.T) {
 			root:       "/var/www/localhost",
 			ports:      []int{80, 443},
 			indexPages: []string{"index.html", "index.htm"},
-			errorPages: nil,
-			errorLog:   "/etc/log/voy/errors.log",
-			accessLog:  "/etc/log/voy/access.log",
+			errorPages: []ErrorPage{
+				{
+					code: 400,
+					page: "error.html",
+				},
+				{
+					code: 404,
+					page: "404.html",
+				},
+			},
+			errorLog:  "/etc/log/voy/errors.log",
+			accessLog: "/etc/log/voy/access.log",
 		},
 		vhosts: []ServerConf{
 			{
@@ -62,9 +71,14 @@ func TestServerConfIsBuilt(t *testing.T) {
 				root:       "/var/www/mydomain.com/public",
 				ports:      []int{8081},
 				indexPages: []string{"index.html"},
-				errorPages: nil,
-				errorLog:   "/etc/log/voy/mydomain.com.log",
-				accessLog:  "/etc/log/voy/mydomain.com.log",
+				errorPages: []ErrorPage{
+					{
+						code: 400,
+						page: "error.html",
+					},
+				},
+				errorLog:  "/etc/log/voy/mydomain.com.log",
+				accessLog: "/etc/log/voy/mydomain.com.log",
 			},
 		},
 	}

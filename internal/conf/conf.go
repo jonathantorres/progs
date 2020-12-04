@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/jonathantorres/voy/internal/http"
 )
 
 // This is supposed to validate, test and parse the configuration file
@@ -88,14 +90,47 @@ func (s *ServerConf) addOption(opName string, opValue string) {
 		s.ports = parsePortOptions(opValue)
 	case indexOption:
 		s.indexPages = parseIndexOptions(opValue)
-	case errorPageOption:
-		// TODO: handle dinamic error page types (404, 501 etc. etc.)
-		s.errorPages = parseErrorPageOptions(opValue)
 	case errorLogOption:
 		s.errorLog = opValue
 	case accessLogOption:
 		s.accessLog = opValue
 	}
+
+	// handle error pages
+	if strings.Contains(opName, errorPageOption) {
+		s.parseErrorPageOptions(opName, opValue)
+	}
+}
+
+func (s *ServerConf) parseErrorPageOptions(errorType, page string) {
+	eTypePieces := strings.Split(errorType, "_")
+	// unlikely, but just in case
+	if len(eTypePieces) == 1 {
+		// TODO: maybe log this? or the function that checks the conf file should detect this?
+		return
+	}
+	if s.errorPages == nil {
+		s.errorPages = make([]ErrorPage, 0)
+	}
+	var errPage ErrorPage
+	if len(eTypePieces) == 3 {
+		// custom error page
+		code, err := strconv.Atoi(eTypePieces[2])
+		if err != nil {
+			return
+		}
+		errPage = ErrorPage{
+			code: code,
+			page: strings.TrimSpace(page),
+		}
+	}
+	if len(eTypePieces) == 2 {
+		errPage = ErrorPage{
+			code: http.StatusBadRequest,
+			page: strings.TrimSpace(page),
+		}
+	}
+	s.errorPages = append(s.errorPages, errPage)
 }
 
 func buildServerConf(file []byte) (*Conf, error) {
@@ -216,8 +251,4 @@ func parseIndexOptions(pages string) []string {
 		parsedPages = append(parsedPages, p)
 	}
 	return parsedPages
-}
-
-func parseErrorPageOptions(pages string) []ErrorPage {
-	return nil
 }
