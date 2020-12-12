@@ -12,10 +12,11 @@ import (
 )
 
 var versionFlag = flag.Bool("version", false, "print current version")
+var confFlag = flag.String("conf", defaultConfFile, "specify the location of the configuration file")
 
 // TODO: must come from a standard location
 // or specified as a command line param
-var confFile = "./voy.conf"
+var defaultConfFile = "./voy.conf"
 
 func main() {
 	flag.Parse()
@@ -23,7 +24,7 @@ func main() {
 		fmt.Fprintf(os.Stdout, "voy server v%s\n", voy.Version)
 		os.Exit(0)
 	}
-	c, err := conf.Load(confFile)
+	c, err := conf.Load(*confFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
