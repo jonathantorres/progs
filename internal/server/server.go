@@ -14,10 +14,7 @@ import (
 // starts the server process and handles every request sent to it
 // handles server start, restart and shutdown
 
-const (
-	defaultName = "localhost"
-	buffSize    = 1024
-)
+const buffSize = 1024
 
 func Start(conf *conf.Conf) error {
 	ports, err := getPortsToListen(conf)
@@ -29,7 +26,7 @@ func Start(conf *conf.Conf) error {
 		wg.Add(1)
 		go func(port int) {
 			defer wg.Done()
-			l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", defaultName, port))
+			l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 			if err != nil {
 				log.Print(err)
 				return
