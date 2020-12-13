@@ -41,6 +41,32 @@ var pay3Headers = map[string]string{
 }
 var pay3Body = []byte("user=foo&password=bar&email=test@test.com")
 
+var pay4 = `GET / HTTP/1.1
+Host: localhost:8021
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Pragma: no-cache
+Cache-Control: no-cache
+`
+var pay4Headers = map[string]string{
+	"Host":                      "localhost:8021",
+	"User-Agent":                "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+	"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+	"Accept-Language":           "en-US,en;q=0.5",
+	"Accept-Encoding":           "gzip, deflate",
+	"DNT":                       "1",
+	"Connection":                "keep-alive",
+	"Upgrade-Insecure-Requests": "1",
+	"Pragma":                    "no-cache",
+	"Cache-Control":             "no-cache",
+}
+var pay4Body []byte = nil
+
 var cases = []struct {
 	payload          string
 	method           string
@@ -53,6 +79,7 @@ var cases = []struct {
 	{pay1, "GET", "/", 1, 1, pay1Headers, pay1Body},
 	{pay2, "GET", "/foo/bar", 1, 1, pay2Headers, pay2Body},
 	{pay3, "POST", "/user/create", 1, 1, pay3Headers, pay3Body},
+	{pay4, "GET", "/", 1, 1, pay4Headers, pay4Body},
 }
 
 func TestRequestLine(t *testing.T) {

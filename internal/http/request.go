@@ -92,7 +92,7 @@ func parseHeaders(reqData []byte) (map[string]string, error) {
 			// we found an empty line, the headers end here
 			break
 		}
-		parts := bytes.Split(tok, []byte(":"))
+		parts := bytes.SplitN(tok, []byte(":"), 2)
 		if len(parts) == 2 {
 			key := string(bytes.TrimSpace(parts[0]))
 			val := string(bytes.TrimSpace(parts[1]))
