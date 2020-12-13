@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 
 	"github.com/jonathantorres/voy/internal/conf"
 	"github.com/jonathantorres/voy/internal/http"
@@ -14,27 +15,37 @@ import (
 // handles server start, restart and shutdown
 
 const (
-	name     = "localhost"
-	port     = 8010
-	buffSize = 1024
+	defaultName = "localhost"
+	buffSize    = 1024
 )
 
 func Start(conf *conf.Conf) error {
-	// TODO: use conf to load configuration stuff
-	// the default server and all of the specified virtual hosts
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", name, port))
+	ports, err := getPortsToListen(conf)
 	if err != nil {
 		return err
 	}
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		go handleConn(conn)
+	var wg sync.WaitGroup
+	for _, p := range ports {
+		wg.Add(1)
+		go func(port int) {
+			defer wg.Done()
+			l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", defaultName, port))
+			if err != nil {
+				log.Print(err)
+				return
+			}
+			for {
+				conn, err := l.Accept()
+				if err != nil {
+					log.Print(err)
+					continue
+				}
+				go handleConn(conn)
+			}
+			l.Close()
+		}(p)
 	}
-	l.Close()
+	wg.Wait()
 	return nil
 }
 
@@ -88,4 +99,41 @@ func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
 	body = append(body, []byte("Hello, world")...) // TODO
 	headers["Content-Type"] = "text/html"          // TODO
 	return code, headers, body, nil
+}
+
+func getPortsToListen(conf *conf.Conf) ([]int, error) {
+	foundPorts := make([]int, 0)
+	if conf.DefaultServer != nil {
+		for _, p := range conf.DefaultServer.Ports {
+			foundPorts = append(foundPorts, p)
+		}
+	}
+	if conf.Vhosts != nil && len(conf.Vhosts) != 0 {
+		for _, vhost := range conf.Vhosts {
+			if vhost.Ports != nil {
+				for _, p := range vhost.Ports {
+					foundPorts = append(foundPorts, p)
+				}
+			}
+		}
+	}
+	if len(foundPorts) == 0 {
+		return nil, errors.New("there are no ports to listen, exiting")
+	}
+	// don't allow duplicated port numbers
+	ports := make([]int, 0)
+	for _, fp := range foundPorts {
+		portFound := false
+		if len(ports) > 0 {
+			for _, p := range ports {
+				if fp == p {
+					portFound = true
+				}
+			}
+		}
+		if !portFound {
+			ports = append(ports, fp)
+		}
+	}
+	return ports, nil
 }
