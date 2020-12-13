@@ -10,10 +10,10 @@ import (
 type Response struct {
 	httpVersionMajor int
 	httpVersionMinor int
-	code             int
-	message          string
-	headers          map[string]string
-	body             []byte
+	Code             int
+	Message          string
+	Headers          map[string]string
+	Body             []byte
 }
 
 func NewResponse(code int, headers map[string]string, body []byte) *Response {
@@ -26,23 +26,23 @@ func NewResponse(code int, headers map[string]string, body []byte) *Response {
 	res := &Response{
 		httpVersionMinor: HTTPVersionMinor,
 		httpVersionMajor: HTTPVersionMajor,
-		code:             code,
-		message:          msg,
-		headers:          headers,
-		body:             body,
+		Code:             code,
+		Message:          msg,
+		Headers:          headers,
+		Body:             body,
 	}
 	return res
 }
 
 func BuildResponseBytes(res *Response) []byte {
 	resBytes := make([]byte, 0)
-	resBytes = append(resBytes, []byte(fmt.Sprintf("HTTP/%d.%d %d %s\r\n", res.httpVersionMajor, res.httpVersionMinor, res.code, res.message))...)
+	resBytes = append(resBytes, []byte(fmt.Sprintf("HTTP/%d.%d %d %s\r\n", res.httpVersionMajor, res.httpVersionMinor, res.Code, res.Message))...)
 
-	for k, v := range res.headers {
+	for k, v := range res.Headers {
 		resBytes = append(resBytes, []byte(fmt.Sprintf("%s: %s\r\n", k, v))...)
 	}
 	resBytes = append(resBytes, []byte("\r\n")...)
-	resBytes = append(resBytes, res.body...)
+	resBytes = append(resBytes, res.Body...)
 	return resBytes
 }
 
@@ -54,10 +54,10 @@ func SendErrorResponse(code int, msg string) *Response {
 	return &Response{
 		httpVersionMajor: HTTPVersionMinor,
 		httpVersionMinor: HTTPVersionMajor,
-		code:             code,
-		message:          msg,
-		headers:          headers,
-		body:             []byte(fmt.Sprintf("%d %s", code, msg)),
+		Code:             code,
+		Message:          msg,
+		Headers:          headers,
+		Body:             []byte(fmt.Sprintf("%d %s", code, msg)),
 	}
 }
 

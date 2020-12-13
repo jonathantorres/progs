@@ -61,11 +61,11 @@ func TestRequestLine(t *testing.T) {
 		if err != nil {
 			t.Errorf(err.Error())
 		}
-		if req.method != c.method {
-			t.Errorf("req method is %s but it should be %s", req.method, c.method)
+		if req.Method != c.method {
+			t.Errorf("req method is %s but it should be %s", req.Method, c.method)
 		}
-		if req.uri != c.uri {
-			t.Errorf("req uri is %s and it should be %s", req.uri, c.uri)
+		if req.Uri != c.uri {
+			t.Errorf("req uri is %s and it should be %s", req.Uri, c.uri)
 		}
 		if req.httpVersionMajor != c.httpVersionMajor {
 			t.Errorf("req major version is %d but it should be %d", req.httpVersionMajor, c.httpVersionMajor)
@@ -82,7 +82,7 @@ func TestParsingOfHeaders(t *testing.T) {
 		if err != nil {
 			t.Errorf(err.Error())
 		}
-		if !reflect.DeepEqual(req.headers, c.headers) {
+		if !reflect.DeepEqual(req.Headers, c.headers) {
 			t.Errorf("headers from payload#%d are not equal", i+1)
 		}
 	}
@@ -94,7 +94,7 @@ func TestParsingOfBody(t *testing.T) {
 		if err != nil {
 			t.Errorf(err.Error())
 		}
-		if !reflect.DeepEqual(req.body, c.body) {
+		if !reflect.DeepEqual(req.Body, c.body) {
 			t.Errorf("request body from payload#%d is not equal", i+1)
 		}
 	}

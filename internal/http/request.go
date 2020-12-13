@@ -9,12 +9,12 @@ import (
 )
 
 type Request struct {
-	method           string
-	uri              string
+	Method           string
+	Uri              string
 	httpVersionMajor int
 	httpVersionMinor int
-	headers          map[string]string
-	body             []byte
+	Headers          map[string]string
+	Body             []byte
 }
 
 var ErrInvalidRequestLine = errors.New("invalid request line")
@@ -34,12 +34,12 @@ func NewRequest(reqData []byte) (*Request, error) {
 	}
 
 	req := &Request{
-		method:           method,
-		uri:              uri,
+		Method:           method,
+		Uri:              uri,
 		httpVersionMajor: major,
 		httpVersionMinor: minor,
-		headers:          headers,
-		body:             body,
+		Headers:          headers,
+		Body:             body,
 	}
 	return req, nil
 }
