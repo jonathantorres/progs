@@ -74,8 +74,9 @@ func handleConn(conn net.Conn) {
 
 	code, headers, body, err := processRequest(req)
 	if err != nil {
-		// TODO: Handle any errors here :)
+		// TODO: Handle any errors to the client here :)
 		log.Println(err)
+		return
 	}
 
 	res := http.NewResponse(code, headers, body)
