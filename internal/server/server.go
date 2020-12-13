@@ -118,7 +118,7 @@ func getPortsToListen(conf *conf.Conf) ([]int, error) {
 		}
 	}
 	if len(foundPorts) == 0 {
-		return nil, errors.New("there are no ports to listen, exiting")
+		return nil, errors.New("no ports to listen")
 	}
 	// don't allow duplicated port numbers
 	ports := make([]int, 0)
