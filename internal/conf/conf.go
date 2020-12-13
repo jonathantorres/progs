@@ -14,25 +14,25 @@ import (
 // This is supposed to validate, test and parse the configuration file
 
 type Conf struct {
-	user          string
-	group         string
-	defaultServer *ServerConf
-	vhosts        []ServerConf
+	User          string
+	Group         string
+	DefaultServer *ServerConf
+	Vhosts        []ServerConf
 }
 
 type ServerConf struct {
-	name       string
-	root       string
-	ports      []int
-	indexPages []string
-	errorPages []ErrorPage
-	errorLog   string
-	accessLog  string
+	Name       string
+	Root       string
+	Ports      []int
+	IndexPages []string
+	ErrorPages []ErrorPage
+	ErrorLog   string
+	AccessLog  string
 }
 
 type ErrorPage struct {
-	code int
-	page string
+	Code int
+	Page string
 }
 
 func Load(confFile string) (*Conf, error) {
@@ -60,40 +60,40 @@ func Load(confFile string) (*Conf, error) {
 }
 
 func (c *Conf) addOption(opName string, opValue string) {
-	if c.defaultServer == nil {
-		c.defaultServer = &ServerConf{}
+	if c.DefaultServer == nil {
+		c.DefaultServer = &ServerConf{}
 	}
 	switch opName {
 	case userOption:
-		c.user = opValue
+		c.User = opValue
 	case groupOption:
-		c.group = opValue
+		c.Group = opValue
 	default:
-		c.defaultServer.addOption(opName, opValue)
+		c.DefaultServer.addOption(opName, opValue)
 	}
 }
 
 func (c *Conf) addVhost(vhost ServerConf) {
-	if c.vhosts == nil {
-		c.vhosts = make([]ServerConf, 0, 10)
+	if c.Vhosts == nil {
+		c.Vhosts = make([]ServerConf, 0, 10)
 	}
-	c.vhosts = append(c.vhosts, vhost)
+	c.Vhosts = append(c.Vhosts, vhost)
 }
 
 func (s *ServerConf) addOption(opName string, opValue string) {
 	switch opName {
 	case nameOption:
-		s.name = opValue
+		s.Name = opValue
 	case rootOption:
-		s.root = opValue
+		s.Root = opValue
 	case portOption:
 		s.parsePortOptions(opValue)
 	case indexOption:
 		s.parseIndexOptions(opValue)
 	case errorLogOption:
-		s.errorLog = opValue
+		s.ErrorLog = opValue
 	case accessLogOption:
-		s.accessLog = opValue
+		s.AccessLog = opValue
 	}
 
 	// handle error pages
@@ -107,14 +107,14 @@ func (s *ServerConf) parsePortOptions(ports string) {
 	if len(portsStr) == 0 {
 		return
 	}
-	s.ports = make([]int, 0)
+	s.Ports = make([]int, 0)
 	for _, p := range portsStr {
 		pInt, err := strconv.Atoi(p)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		s.ports = append(s.ports, pInt)
+		s.Ports = append(s.Ports, pInt)
 	}
 }
 
@@ -123,9 +123,9 @@ func (s *ServerConf) parseIndexOptions(pages string) {
 	if len(pagesSli) == 0 {
 		return
 	}
-	s.indexPages = make([]string, 0)
+	s.IndexPages = make([]string, 0)
 	for _, p := range pagesSli {
-		s.indexPages = append(s.indexPages, p)
+		s.IndexPages = append(s.IndexPages, p)
 	}
 }
 
@@ -136,8 +136,8 @@ func (s *ServerConf) parseErrorPageOptions(errorType, page string) {
 		// TODO: maybe log this? or the function that checks the conf file should detect this?
 		return
 	}
-	if s.errorPages == nil {
-		s.errorPages = make([]ErrorPage, 0)
+	if s.ErrorPages == nil {
+		s.ErrorPages = make([]ErrorPage, 0)
 	}
 	var errPage ErrorPage
 	if len(eTypePieces) == 3 {
@@ -147,17 +147,17 @@ func (s *ServerConf) parseErrorPageOptions(errorType, page string) {
 			return
 		}
 		errPage = ErrorPage{
-			code: code,
-			page: strings.TrimSpace(page),
+			Code: code,
+			Page: strings.TrimSpace(page),
 		}
 	}
 	if len(eTypePieces) == 2 {
 		errPage = ErrorPage{
-			code: http.StatusBadRequest,
-			page: strings.TrimSpace(page),
+			Code: http.StatusBadRequest,
+			Page: strings.TrimSpace(page),
 		}
 	}
-	s.errorPages = append(s.errorPages, errPage)
+	s.ErrorPages = append(s.ErrorPages, errPage)
 }
 
 func buildServerConf(file []byte) (*Conf, error) {

@@ -45,40 +45,40 @@ func TestSyntaxErrorsAreFound(t *testing.T) {
 
 func TestServerConfIsBuilt(t *testing.T) {
 	wantConf := Conf{
-		user:  "www-data",
-		group: "www-data",
-		defaultServer: &ServerConf{
-			name:       "localhost",
-			root:       "/var/www/localhost",
-			ports:      []int{80, 443},
-			indexPages: []string{"index.html", "index.htm"},
-			errorPages: []ErrorPage{
+		User:  "www-data",
+		Group: "www-data",
+		DefaultServer: &ServerConf{
+			Name:       "localhost",
+			Root:       "/var/www/localhost",
+			Ports:      []int{80, 443},
+			IndexPages: []string{"index.html", "index.htm"},
+			ErrorPages: []ErrorPage{
 				{
-					code: 400,
-					page: "error.html",
+					Code: 400,
+					Page: "error.html",
 				},
 				{
-					code: 404,
-					page: "404.html",
+					Code: 404,
+					Page: "404.html",
 				},
 			},
-			errorLog:  "/etc/log/voy/errors.log",
-			accessLog: "/etc/log/voy/access.log",
+			ErrorLog:  "/etc/log/voy/errors.log",
+			AccessLog: "/etc/log/voy/access.log",
 		},
-		vhosts: []ServerConf{
+		Vhosts: []ServerConf{
 			{
-				name:       "mydomain.com",
-				root:       "/var/www/mydomain.com/public",
-				ports:      []int{8081},
-				indexPages: []string{"index.html"},
-				errorPages: []ErrorPage{
+				Name:       "mydomain.com",
+				Root:       "/var/www/mydomain.com/public",
+				Ports:      []int{8081},
+				IndexPages: []string{"index.html"},
+				ErrorPages: []ErrorPage{
 					{
-						code: 400,
-						page: "error.html",
+						Code: 400,
+						Page: "error.html",
 					},
 				},
-				errorLog:  "/etc/log/voy/mydomain.com.log",
-				accessLog: "/etc/log/voy/mydomain.com.log",
+				ErrorLog:  "/etc/log/voy/mydomain.com.log",
+				AccessLog: "/etc/log/voy/mydomain.com.log",
 			},
 		},
 	}
