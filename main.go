@@ -13,10 +13,7 @@ import (
 
 var versionFlag = flag.Bool("version", false, "print current version")
 var confFlag = flag.String("conf", defaultConfFile, "specify the location of the configuration file")
-
-// TODO: must come from a standard location
-// or specified as a command line param
-var defaultConfFile = "./voy.conf"
+var defaultConfFile = "/usr/local/etc/voy"
 
 func main() {
 	flag.Parse()
