@@ -48,7 +48,7 @@ func TestServerConfIsBuilt(t *testing.T) {
 		User:  "www-data",
 		Group: "www-data",
 		DefaultServer: &ServerConf{
-			Name:       "localhost",
+			Names:      []string{"localhost"},
 			Root:       "/var/www/localhost",
 			Ports:      []int{80, 443},
 			IndexPages: []string{"index.html", "index.htm"},
@@ -67,7 +67,35 @@ func TestServerConfIsBuilt(t *testing.T) {
 		},
 		Vhosts: []ServerConf{
 			{
-				Name:       "mydomain.com",
+				Names:      []string{"mydomain.com"},
+				Root:       "/var/www/mydomain.com/public",
+				Ports:      []int{8081},
+				IndexPages: []string{"index.html"},
+				ErrorPages: []ErrorPage{
+					{
+						Code: 400,
+						Page: "error.html",
+					},
+				},
+				ErrorLog:  "/etc/log/voy/mydomain.com.log",
+				AccessLog: "/etc/log/voy/mydomain.com.log",
+			},
+			{
+				Names:      []string{"example.com", "www.example.com"},
+				Root:       "/var/www/mydomain.com/public",
+				Ports:      []int{8081},
+				IndexPages: []string{"index.html"},
+				ErrorPages: []ErrorPage{
+					{
+						Code: 400,
+						Page: "error.html",
+					},
+				},
+				ErrorLog:  "/etc/log/voy/mydomain.com.log",
+				AccessLog: "/etc/log/voy/mydomain.com.log",
+			},
+			{
+				Names:      []string{"test.com", "www.test.com"},
 				Root:       "/var/www/mydomain.com/public",
 				Ports:      []int{8081},
 				IndexPages: []string{"index.html"},

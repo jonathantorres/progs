@@ -18,3 +18,23 @@ vhost {
     error_log = /etc/log/voy/mydomain.com.log
     access_log = /etc/log/voy/mydomain.com.log
 }
+
+vhost {
+    name = example.com,www.example.com
+    port = 8081
+    root = /var/www/mydomain.com/public
+    index = index.html
+    error_page = error.html
+    error_log = /etc/log/voy/mydomain.com.log
+    access_log = /etc/log/voy/mydomain.com.log
+}
+
+vhost {
+    name = test.com,www.test.com,www.test.com
+    port = 8081
+    root = /var/www/mydomain.com/public
+    index = index.html
+    error_page = error.html
+    error_log = /etc/log/voy/mydomain.com.log
+    access_log = /etc/log/voy/mydomain.com.log
+}

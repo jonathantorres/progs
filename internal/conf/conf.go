@@ -21,7 +21,7 @@ type Conf struct {
 }
 
 type ServerConf struct {
-	Name       string
+	Names      []string
 	Root       string
 	Ports      []int
 	IndexPages []string
@@ -83,7 +83,7 @@ func (c *Conf) addVhost(vhost ServerConf) {
 func (s *ServerConf) addOption(opName string, opValue string) {
 	switch opName {
 	case nameOption:
-		s.Name = opValue
+		s.parseNameOptions(opValue)
 	case rootOption:
 		s.Root = opValue
 	case portOption:
@@ -99,6 +99,26 @@ func (s *ServerConf) addOption(opName string, opValue string) {
 	// handle error pages
 	if strings.Contains(opName, errorPageOption) {
 		s.parseErrorPageOptions(opName, opValue)
+	}
+}
+
+func (s *ServerConf) parseNameOptions(serverNames string) {
+	names := strings.Split(serverNames, ",")
+	if len(names) == 0 {
+		return
+	}
+	s.Names = make([]string, 0)
+	for _, n := range names {
+		// don't include duplicated names
+		containsName := false
+		for _, n2 := range s.Names {
+			if n == n2 {
+				containsName = true
+			}
+		}
+		if !containsName {
+			s.Names = append(s.Names, n)
+		}
 	}
 }
 
