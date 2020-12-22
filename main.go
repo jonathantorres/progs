@@ -35,9 +35,9 @@ func main() {
 	}
 	c, err := conf.Load(confFlag)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s, exiting...", err)
 	}
 	if err := server.Start(c); err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s, exiting...", err)
 	}
 }

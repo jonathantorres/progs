@@ -31,6 +31,7 @@ func Start(conf *conf.Conf) error {
 				log.Print(err)
 				return
 			}
+			log.Printf("goroutine listening on %d", port)
 			for {
 				conn, err := l.Accept()
 				if err != nil {
@@ -40,6 +41,7 @@ func Start(conf *conf.Conf) error {
 				go handleConn(conn)
 			}
 			l.Close()
+			log.Printf("goroutine done")
 		}(p)
 	}
 	wg.Wait()
@@ -49,7 +51,7 @@ func Start(conf *conf.Conf) error {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 	reqData := make([]byte, buffSize)
-	_, err := conn.Read(reqData)
+	read, err := conn.Read(reqData)
 	if err != nil {
 		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
 		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
@@ -57,6 +59,7 @@ func handleConn(conn net.Conn) {
 		log.Println(err)
 		return
 	}
+	log.Printf("processing request %d bytes read", read)
 	req, err := http.NewRequest(reqData)
 	if err != nil {
 		if errors.Is(err, http.ErrInvalidRequestLine) {
@@ -71,6 +74,7 @@ func handleConn(conn net.Conn) {
 		log.Println(err)
 		return
 	}
+	log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
 
 	code, headers, body, err := processRequest(req)
 	if err != nil {
@@ -80,13 +84,15 @@ func handleConn(conn net.Conn) {
 	}
 
 	res := http.NewResponse(code, headers, body)
-	_, err = conn.Write(http.BuildResponseBytes(res))
+	written, err := conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
 		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
 		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
 		conn.Write(bytes)
 		log.Println(err)
 	}
+	log.Printf("request processed %d bytes written", written)
+	log.Printf("HTTP/%d.%d %d %s", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message)
 }
 
 func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
