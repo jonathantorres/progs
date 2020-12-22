@@ -53,9 +53,7 @@ func handleConn(conn net.Conn) {
 	reqData := make([]byte, buffSize)
 	read, err := conn.Read(reqData)
 	if err != nil {
-		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
-		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
-		conn.Write(bytes)
+		writeErrResponse(conn, http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}
@@ -63,13 +61,9 @@ func handleConn(conn net.Conn) {
 	req, err := http.NewRequest(reqData)
 	if err != nil {
 		if errors.Is(err, http.ErrInvalidRequestLine) {
-			msg, _ := http.GetStatusCodeMessage(http.StatusBadRequest)
-			bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusBadRequest, msg))
-			conn.Write(bytes)
+			writeErrResponse(conn, http.StatusBadRequest)
 		} else {
-			msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
-			bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
-			conn.Write(bytes)
+			writeErrResponse(conn, http.StatusInternalServerError)
 		}
 		log.Println(err)
 		return
@@ -103,6 +97,15 @@ func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
 	body = append(body, []byte("Hello, world")...) // TODO
 	headers["Content-Type"] = "text/html"          // TODO
 	return code, headers, body, nil
+}
+
+func writeErrResponse(conn net.Conn, code int) {
+	msg, _ := http.GetStatusCodeMessage(code)
+	bytes := http.BuildResponseBytes(http.SendErrorResponse(code, msg))
+	_, err := conn.Write(bytes)
+	if err != nil {
+		log.Printf("error writing error response %s", err)
+	}
 }
 
 func getPortsToListen(conf *conf.Conf) ([]int, error) {
