@@ -80,9 +80,7 @@ func handleConn(conn net.Conn) {
 	res := http.NewResponse(code, headers, body)
 	written, err := conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
-		msg, _ := http.GetStatusCodeMessage(http.StatusInternalServerError)
-		bytes := http.BuildResponseBytes(http.SendErrorResponse(http.StatusInternalServerError, msg))
-		conn.Write(bytes)
+		writeErrResponse(conn, http.StatusInternalServerError)
 		log.Println(err)
 	}
 	log.Printf("request processed %d bytes written", written)
