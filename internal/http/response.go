@@ -8,8 +8,8 @@ import (
 )
 
 type Response struct {
-	httpVersionMajor int
-	httpVersionMinor int
+	HTTPVersionMajor int
+	HTTPVersionMinor int
 	Code             int
 	Message          string
 	Headers          map[string]string
@@ -24,8 +24,8 @@ func NewResponse(code int, headers map[string]string, body []byte) *Response {
 	}
 	addDefaultResponseHeaders(headers)
 	res := &Response{
-		httpVersionMinor: HTTPVersionMinor,
-		httpVersionMajor: HTTPVersionMajor,
+		HTTPVersionMinor: HTTPVersionMinor,
+		HTTPVersionMajor: HTTPVersionMajor,
 		Code:             code,
 		Message:          msg,
 		Headers:          headers,
@@ -36,7 +36,7 @@ func NewResponse(code int, headers map[string]string, body []byte) *Response {
 
 func BuildResponseBytes(res *Response) []byte {
 	resBytes := make([]byte, 0)
-	resBytes = append(resBytes, []byte(fmt.Sprintf("HTTP/%d.%d %d %s\r\n", res.httpVersionMajor, res.httpVersionMinor, res.Code, res.Message))...)
+	resBytes = append(resBytes, []byte(fmt.Sprintf("HTTP/%d.%d %d %s\r\n", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message))...)
 
 	for k, v := range res.Headers {
 		resBytes = append(resBytes, []byte(fmt.Sprintf("%s: %s\r\n", k, v))...)
@@ -52,8 +52,8 @@ func SendErrorResponse(code int, msg string) *Response {
 	headers["Content-Type"] = "text/html"
 	headers["Connection"] = "close"
 	return &Response{
-		httpVersionMajor: HTTPVersionMinor,
-		httpVersionMinor: HTTPVersionMajor,
+		HTTPVersionMajor: HTTPVersionMinor,
+		HTTPVersionMinor: HTTPVersionMajor,
 		Code:             code,
 		Message:          msg,
 		Headers:          headers,

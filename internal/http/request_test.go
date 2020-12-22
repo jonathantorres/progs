@@ -71,8 +71,8 @@ var cases = []struct {
 	payload          string
 	method           string
 	uri              string
-	httpVersionMajor int
-	httpVersionMinor int
+	HTTPVersionMajor int
+	HTTPVersionMinor int
 	headers          map[string]string
 	body             []byte
 }{
@@ -94,11 +94,11 @@ func TestRequestLine(t *testing.T) {
 		if req.Uri != c.uri {
 			t.Errorf("req uri is %s and it should be %s", req.Uri, c.uri)
 		}
-		if req.httpVersionMajor != c.httpVersionMajor {
-			t.Errorf("req major version is %d but it should be %d", req.httpVersionMajor, c.httpVersionMajor)
+		if req.HTTPVersionMajor != c.HTTPVersionMajor {
+			t.Errorf("req major version is %d but it should be %d", req.HTTPVersionMajor, c.HTTPVersionMajor)
 		}
-		if req.httpVersionMinor != c.httpVersionMinor {
-			t.Errorf("req minor version is %d but it should be %d", req.httpVersionMinor, c.httpVersionMinor)
+		if req.HTTPVersionMinor != c.HTTPVersionMinor {
+			t.Errorf("req minor version is %d but it should be %d", req.HTTPVersionMinor, c.HTTPVersionMinor)
 		}
 	}
 }

@@ -11,8 +11,8 @@ import (
 type Request struct {
 	Method           string
 	Uri              string
-	httpVersionMajor int
-	httpVersionMinor int
+	HTTPVersionMajor int
+	HTTPVersionMinor int
 	Headers          map[string]string
 	Body             []byte
 }
@@ -36,8 +36,8 @@ func NewRequest(reqData []byte) (*Request, error) {
 	req := &Request{
 		Method:           method,
 		Uri:              uri,
-		httpVersionMajor: major,
-		httpVersionMinor: minor,
+		HTTPVersionMajor: major,
+		HTTPVersionMinor: minor,
 		Headers:          headers,
 		Body:             body,
 	}
