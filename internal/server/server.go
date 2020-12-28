@@ -50,26 +50,61 @@ func Start(conf *conf.Conf) error {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	reqData := make([]byte, buffSize)
-	read, err := conn.Read(reqData)
-	if err != nil {
-		writeErrResponse(conn, http.StatusInternalServerError)
-		log.Println(err)
-		return
+	req := &http.Request{}
+	var bufErr error
+	for {
+		if req.DoneReading {
+			break
+		}
+		curReqData := make([]byte, buffSize)
+		br, err := conn.Read(curReqData)
+		if err != nil {
+			log.Println(err)
+			bufErr = err
+			// TODO: handle this error somehow (send error response?)
+			break
+		}
+		log.Printf("read %d bytes", br)
+		if !req.LineIsRead {
+			err = req.ReadLine(&curReqData)
+			if err != nil {
+				log.Println(err)
+				bufErr = err
+				// TODO: handle this error somehow (send error response?)
+				break
+			}
+		}
+		if !req.HeadersAreRead {
+			err = req.ReadHeaders(&curReqData)
+			if err != nil {
+				log.Println(err)
+				bufErr = err
+				// TODO: handle this error somehow (send error response?)
+				break
+			}
+		}
+		if !req.BodyIsRead {
+			err = req.ReadBody(&curReqData, br)
+			if err != nil {
+				log.Println(err)
+				bufErr = err
+				// TODO: handle this error somehow (send error response?)
+				break
+			}
+		}
 	}
-	log.Printf("processing request %d bytes read", read)
-	req, err := http.NewRequest(reqData)
-	if err != nil {
-		if errors.Is(err, http.ErrInvalidRequestLine) {
+
+	if bufErr != nil {
+		if errors.Is(bufErr, http.ErrInvalidRequestLine) {
 			writeErrResponse(conn, http.StatusBadRequest)
 		} else {
 			writeErrResponse(conn, http.StatusInternalServerError)
 		}
-		log.Println(err)
+		log.Println(bufErr)
 		return
 	}
-	log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
 
+	log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
 	code, headers, body, err := processRequest(req)
 	if err != nil {
 		// TODO: Handle any errors to the client here :)
