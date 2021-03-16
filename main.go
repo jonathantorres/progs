@@ -11,6 +11,7 @@ func main() {
 	var gitignore = flag.Bool("g", false, "Generate a .gitignore file")
 	var readme = flag.Bool("r", false, "Generate a README.md file")
 	var isPackage = flag.Bool("p", false, "Generate a package file, instead of a binary")
+	var fileOnly = flag.Bool("f", false, "Generate a single file, as a binary")
 	var printVersion = flag.Bool("v", false, "Print gonew's version")
 	var name string
 	flag.Parse()
@@ -25,6 +26,13 @@ func main() {
 	}
 
 	name = flag.Args()[0]
+	if *fileOnly {
+		if err := createSingleMainFile(&name); err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
 	createRootFolder(&name)
 	if *isPackage {
 		if err := createPackageFile(&name); err != nil {
@@ -88,6 +96,14 @@ func createMain(path *string) error {
 	err := createFile(*path+"/main.go", []byte(mainText))
 	if err != nil {
 		return fmt.Errorf("there was a problem creating main.go file, %s\n", err)
+	}
+	return nil
+}
+
+func createSingleMainFile(path *string) error {
+	err := createFile("./"+*path+".go", []byte(mainText))
+	if err != nil {
+		return fmt.Errorf("there was a problem creating %s.go file, %s\n", *path, err)
 	}
 	return nil
 }

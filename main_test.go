@@ -84,6 +84,20 @@ func TestCreateReadme(t *testing.T) {
 	removeTestFolder()
 }
 
+func TestCreateSingleMainFile(t *testing.T) {
+	if err := createSingleMainFile(&folderName); err != nil {
+		t.Errorf("%s", err)
+	}
+	fileContents, _ := ioutil.ReadFile("./" + folderName + ".go")
+	stubContents := mainText
+	if string(fileContents) != stubContents {
+		t.Errorf("generated file %s is not the same as stub", folderName+".go")
+		t.Logf("%s", string(fileContents))
+		t.Logf("%s", stubContents)
+	}
+	os.Remove("./" + folderName + ".go")
+}
+
 func removeTestFolder() {
 	os.RemoveAll(folderName)
 }
