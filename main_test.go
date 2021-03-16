@@ -3,8 +3,8 @@ package main
 import (
 	"io/ioutil"
 	"os"
-	"testing"
 	"strings"
+	"testing"
 )
 
 var folderName = "test1"
@@ -23,7 +23,7 @@ func TestCreatePackageFile(t *testing.T) {
 	if err := createPackageFile(&folderName); err != nil {
 		t.Errorf("%s", err)
 	}
-	fileContents, _ := ioutil.ReadFile(folderName+"/"+folderName+".go")
+	fileContents, _ := ioutil.ReadFile(folderName + "/" + folderName + ".go")
 	stubContents := strings.Replace(packageText, "{project}", folderName, -1)
 	if string(fileContents) != stubContents {
 		t.Errorf("generated file %s is not the same as stub", folderName+"/"+folderName+".go")
@@ -40,7 +40,7 @@ func TestCreateMainFile(t *testing.T) {
 	if err := createMain(&folderName); err != nil {
 		t.Errorf("%s", err)
 	}
-	fileContents, _ := ioutil.ReadFile(folderName+"/"+"main.go")
+	fileContents, _ := ioutil.ReadFile(folderName + "/" + "main.go")
 	stubContents := mainText
 	if string(fileContents) != stubContents {
 		t.Errorf("generated file %s is not the same as stub", folderName+"/main.go")
@@ -57,7 +57,7 @@ func TestCreateGitIgnore(t *testing.T) {
 	if err := createGitIgnore(&folderName); err != nil {
 		t.Errorf("%s", err)
 	}
-	fileContents, _ := ioutil.ReadFile(folderName+"/"+".gitignore")
+	fileContents, _ := ioutil.ReadFile(folderName + "/" + ".gitignore")
 	stubContents := gitignoreText
 	if string(fileContents) != stubContents {
 		t.Errorf("generated file %s is not the same as stub", folderName+"/.gitignore")
@@ -74,7 +74,7 @@ func TestCreateReadme(t *testing.T) {
 	if err := createReadme(&folderName); err != nil {
 		t.Errorf("%s", err)
 	}
-	fileContents, _ := ioutil.ReadFile(folderName+"/README.md")
+	fileContents, _ := ioutil.ReadFile(folderName + "/README.md")
 	stubContents := strings.Replace(readmeText, "{project}", folderName, -1)
 	if string(fileContents) != stubContents {
 		t.Errorf("generated file %s is not the same as stub", folderName+"/README.md")
