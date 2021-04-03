@@ -27,7 +27,7 @@ func main() {
 		registerLogger()
 	}
 
-	addr := fmt.Sprintf("localhost:%d", *port)
+	addr := fmt.Sprintf(":%d", *port)
 	handler := ServerHandler{}
 	err := http.ListenAndServe(addr, &handler)
 	if err != nil {
