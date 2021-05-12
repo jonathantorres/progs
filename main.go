@@ -78,16 +78,18 @@ func sendPingPacket() error {
 		return err
 	}
 	msg := make([]byte, 8+packetSize)
-	msg[0] = byte(8)                        // type
-	msg[1] = byte(0)                        // code
-	msg[2], msg[3] = byte(0xe4), byte(0xd0) // checksum (needs to be computed)
-	msg[4], msg[5] = byte(0), byte(0)       // id
-	msg[6], msg[7] = byte(0), byte(0)       // seq number
+	msg[0], msg[1] = byte(8), byte(0) // type and code
+	msg[2], msg[3] = byte(0), byte(0) // checksum
+	msg[4], msg[5] = byte(0), byte(0) // id
+	msg[6], msg[7] = byte(0), byte(0) // seq number
 
-	// data
+	// build packet data
 	for i, offset := 1, 8; i <= packetSize; i, offset = i+1, offset+1 {
-		msg[offset] = byte(i)
+		msg[offset] = byte(0)
 	}
+	csum := calculateChecksum(msg)
+	msg[2] = byte(csum >> 8)
+	msg[3] = byte(csum & 255)
 	_, err = conn.Write(msg)
 	if err != nil {
 		return err
@@ -106,6 +108,23 @@ func recvPing() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		}
-		fmt.Printf("we got: %d bytes: %v\n", b, buf)
+		fmt.Printf("we got: %d bytes\n", b)
 	}
+}
+
+// todo: fix this calculation, it only works when bytes with 0 are sent in the payload
+func calculateChecksum(msg []byte) uint16 {
+	// build out the data in 16-bit chunks
+	words := make([]uint16, 0, packetSize/2)
+	for i := 0; i < len(msg); i += 2 {
+		l := uint16(msg[i]) << 8
+		word := uint16(l) | uint16(msg[i+1])
+		words = append(words, word)
+	}
+	// calculate checksum
+	var csum uint16
+	for _, w := range words {
+		csum = csum + w
+	}
+	return ^csum
 }
