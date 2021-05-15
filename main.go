@@ -12,9 +12,13 @@ import (
 // The ping program contains two logical portions: one transmits an
 // ICMP echo request message every second and the other receives
 // any echo reply messages that are returned
+const headerSize = 8
 
 // the number of data bytes to be sent, the -s flag can change this
-var packetSize = 56
+var (
+	packetSize     = 56
+	recvBufferSize = 1024
+)
 
 func main() {
 	flag.Parse()
@@ -55,6 +59,45 @@ func main() {
 	<-wait
 }
 
+type packet struct {
+	pType    uint8
+	code     uint8
+	checksum uint16
+	id       uint16
+	seqNum   uint16
+	data     []byte
+}
+
+func newPacket(id uint16, seq uint16) *packet {
+	return &packet{
+		pType:  uint8(8),
+		code:   uint8(0),
+		id:     id,
+		seqNum: seq,
+		data:   nil,
+	}
+}
+
+func (p *packet) buildData() []byte {
+	pData := make([]byte, headerSize+packetSize)
+	pData[0], pData[1] = byte(p.pType), byte(p.code)       // type and code
+	pData[2], pData[3] = byte(0), byte(0)                  // checksum
+	pData[4], pData[5] = byte(p.id>>8), byte(p.id)         // id
+	pData[6], pData[7] = byte(p.seqNum>>8), byte(p.seqNum) // seq number
+
+	// build packet data
+	for i, j := 1, headerSize; i <= packetSize; i, j = i+1, j+1 {
+		pData[j] = byte(0) // todo: fill with random ascii characters
+	}
+	p.data = pData[headerSize:]
+	csum := calculateChecksum(pData)
+	p.checksum = csum
+	pData[2] = byte(csum >> 8)
+	pData[3] = byte(csum & 255)
+
+	return pData
+}
+
 func printPingMessage(destination, solvedDest string) {
 	fmt.Fprintf(os.Stdout, "PING %s ", destination)
 	if solvedDest != "" {
@@ -89,20 +132,8 @@ func connect(dest string) (net.Conn, error) {
 }
 
 func sendPingPacket(conn net.Conn) error {
-	msg := make([]byte, 8+packetSize)
-	msg[0], msg[1] = byte(8), byte(0) // type and code
-	msg[2], msg[3] = byte(0), byte(0) // checksum
-	msg[4], msg[5] = byte(0), byte(0) // id
-	msg[6], msg[7] = byte(0), byte(0) // seq number
-
-	// build packet data
-	for i, offset := 1, 8; i <= packetSize; i, offset = i+1, offset+1 {
-		msg[offset] = byte(0)
-	}
-	csum := calculateChecksum(msg)
-	msg[2] = byte(csum >> 8)
-	msg[3] = byte(csum & 255)
-	b, err := conn.Write(msg)
+	pack := newPacket(uint16(0), uint16(0))
+	b, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
 	}
@@ -112,7 +143,7 @@ func sendPingPacket(conn net.Conn) error {
 
 func recvPing(conn net.Conn) {
 	// this will receive the reply messages from the echo requests
-	buf := make([]byte, 1024)
+	buf := make([]byte, recvBufferSize)
 	for {
 		b, err := conn.Read(buf)
 		if err != nil {
