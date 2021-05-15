@@ -14,10 +14,11 @@ import (
 // any echo reply messages that are returned
 const headerSize = 8
 
-// the number of data bytes to be sent, the -s flag can change this
 var (
-	packetSize     = 56
-	recvBufferSize = 1024
+	packetSize     = 64   // the number of  bytes to be sent, the -s flag can change this
+	recvBufferSize = 1024 // buffer size when receiving replies
+	packetId       = 0    // id for each packet sent
+	numTransmitted = 0    // number of packets sent
 )
 
 func main() {
@@ -48,6 +49,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "zing: error connecting: %s\n", err)
 		os.Exit(1)
 	}
+
+	packetId = os.Getpid() & 0xffff
 	printPingMessage(destination, solvedDest)
 	go pinger(conn)
 	go recvPing(conn)
@@ -132,7 +135,8 @@ func connect(dest string) (net.Conn, error) {
 }
 
 func sendPingPacket(conn net.Conn) error {
-	pack := newPacket(uint16(0), uint16(0))
+	numTransmitted++
+	pack := newPacket(uint16(packetId), uint16(numTransmitted))
 	b, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
