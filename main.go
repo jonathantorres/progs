@@ -34,9 +34,12 @@ func main() {
 	}
 	destination = flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
-	if err != nil || len(addrs) == 0 {
-		fmt.Fprintf(os.Stdout, "zing: lookup for %s failed\n", destination)
-		printUsage()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "zing: lookup for %s failed\n", destination)
+		os.Exit(1)
+	}
+	if len(addrs) == 0 {
+		fmt.Fprintf(os.Stderr, "zing: no addresses were found for %s\n", destination)
 		os.Exit(1)
 	}
 	solvedDest = addrs[0]
