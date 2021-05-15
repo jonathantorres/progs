@@ -12,10 +12,6 @@ import (
 // The ping program contains two logical portions: one transmits an
 // ICMP echo request message every second and the other receives
 // any echo reply messages that are returned
-var destination string
-var solvedDest string
-
-var conn *net.IPConn
 
 // the number of data bytes to be sent, the -s flag can change this
 var packetSize = 56
@@ -32,7 +28,7 @@ func main() {
 		printUsage()
 		os.Exit(1)
 	}
-	destination = flag.Args()[0]
+	destination := flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "zing: lookup for %s failed\n", destination)
@@ -42,19 +38,24 @@ func main() {
 		fmt.Fprintf(os.Stderr, "zing: no addresses were found for %s\n", destination)
 		os.Exit(1)
 	}
-	solvedDest = addrs[0]
-	wait := make(chan struct{})
-	printPingMessage()
-	go pinger()
-	go recvPing()
+	solvedDest := addrs[0]
+	conn, err := connect(solvedDest)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "zing: error connecting: %s\n", err)
+		os.Exit(1)
+	}
+	printPingMessage(destination, solvedDest)
+	go pinger(conn)
+	go recvPing(conn)
 
 	// TODO: create signal handler that will terminate
 	// the program when a SIGINT is sent to the process (^C)
 	// simulate wait for now
+	wait := make(chan struct{})
 	<-wait
 }
 
-func printPingMessage() {
+func printPingMessage(destination, solvedDest string) {
 	fmt.Fprintf(os.Stdout, "PING %s ", destination)
 	if solvedDest != "" {
 		fmt.Fprintf(os.Stdout, "(%s)", solvedDest)
@@ -66,9 +67,9 @@ func printUsage() {
 	// TODO
 }
 
-func pinger() {
+func pinger(conn net.Conn) {
 	for {
-		if err := sendPingPacket(); err != nil {
+		if err := sendPingPacket(conn); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err)
 			break
 		}
@@ -76,15 +77,18 @@ func pinger() {
 	}
 }
 
-func sendPingPacket() error {
+func connect(dest string) (net.Conn, error) {
 	raddr := net.IPAddr{
-		IP: net.ParseIP(solvedDest),
+		IP: net.ParseIP(dest),
 	}
-	var err error
-	conn, err = net.DialIP("ip4:1", nil, &raddr)
+	conn, err := net.DialIP("ip4:1", nil, &raddr)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return conn, nil
+}
+
+func sendPingPacket(conn net.Conn) error {
 	msg := make([]byte, 8+packetSize)
 	msg[0], msg[1] = byte(8), byte(0) // type and code
 	msg[2], msg[3] = byte(0), byte(0) // checksum
@@ -98,25 +102,24 @@ func sendPingPacket() error {
 	csum := calculateChecksum(msg)
 	msg[2] = byte(csum >> 8)
 	msg[3] = byte(csum & 255)
-	_, err = conn.Write(msg)
+	b, err := conn.Write(msg)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("sent %d bytes to %s\n", b, conn.RemoteAddr().String())
 	return nil
 }
 
-func recvPing() {
+func recvPing(conn net.Conn) {
 	// this will receive the reply messages from the echo requests
 	buf := make([]byte, 1024)
 	for {
-		if conn == nil {
-			continue
-		}
 		b, err := conn.Read(buf)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			continue
 		}
-		fmt.Printf("we got: %d bytes\n", b)
+		fmt.Printf("received %d bytes from %s\n", b, conn.RemoteAddr().String())
 	}
 }
 
