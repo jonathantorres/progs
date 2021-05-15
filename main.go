@@ -22,23 +22,24 @@ var packetSize = 56
 
 func main() {
 	flag.Parse()
-
 	if len(flag.Args()) == 0 {
-		fmt.Fprintf(os.Stderr, "a destination must be specified\n")
+		fmt.Fprintf(os.Stderr, "zing: a destination must be specified\n")
+		printUsage()
 		os.Exit(1)
 	}
 	if len(flag.Args()) > 1 {
-		fmt.Fprintf(os.Stderr, "only 1 destination must be specified\n")
+		fmt.Fprintf(os.Stderr, "zing: only 1 destination must be specified\n")
+		printUsage()
 		os.Exit(1)
 	}
 	destination = flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "warning: lookup for %s failed\n", destination)
+	if err != nil || len(addrs) == 0 {
+		fmt.Fprintf(os.Stdout, "zing: lookup for %s failed\n", destination)
+		printUsage()
+		os.Exit(1)
 	}
-	if len(addrs) > 0 {
-		solvedDest = addrs[0]
-	}
+	solvedDest = addrs[0]
 	wait := make(chan struct{})
 	printPingMessage()
 	go pinger()
@@ -56,6 +57,10 @@ func printPingMessage() {
 		fmt.Fprintf(os.Stdout, "(%s)", solvedDest)
 	}
 	fmt.Fprintf(os.Stdout, " %d bytes of data.\n", packetSize)
+}
+
+func printUsage() {
+	// TODO
 }
 
 func pinger() {
