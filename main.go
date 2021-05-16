@@ -14,7 +14,10 @@ import (
 // The ping program contains two logical portions: one transmits an
 // ICMP echo request message every second and the other receives
 // any echo reply messages that are returned
-const headerSize = 8
+const (
+	headerSize   = 8
+	ipHeaderSize = 20
+)
 
 var (
 	packetSize     = 56   // the number of  bytes to be sent, the -s flag can change this
@@ -149,11 +152,11 @@ func connect(dest string) (net.Conn, error) {
 func sendPingPacket(conn net.Conn) error {
 	numTransmitted++
 	pack := newPacket(uint16(packetId), uint16(numTransmitted))
-	b, err := conn.Write(pack.buildData())
+	_, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
 	}
-	fmt.Printf("sent %d bytes to %s\n", b, conn.RemoteAddr().String())
+	// fmt.Printf("sent %d bytes to %s\n", b, conn.RemoteAddr().String())
 	return nil
 }
 
@@ -166,8 +169,40 @@ func recvPing(conn net.Conn) {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err)
 			continue
 		}
-		fmt.Printf("received %d bytes from %s\n", b, conn.RemoteAddr().String())
+		printReceivedPacket(buf, b, conn)
 	}
+}
+
+func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
+	id := getPacketId(buf)
+	// do nothing since this packet does not belong to this process
+	if int(id) != packetId {
+		return
+	}
+	bLen := bytesRead - ipHeaderSize
+	raddr := conn.RemoteAddr().String()
+	seq := getPacketSeqNum(buf)
+	packTime := calculatePacketTime(buf)
+	fmt.Printf("%d bytes from %s: icmp_seq=%d time=%s\n", bLen, raddr, seq, packTime)
+}
+
+func getPacketId(buf []byte) uint16 {
+	packId := buf[24:26]
+	id := uint16(packId[0]) << 8
+	id |= uint16(packId[1])
+	return id & 0xffff
+}
+
+func getPacketSeqNum(buf []byte) uint16 {
+	return uint16(0)
+}
+
+func calculatePacketTime(buf []byte) string {
+	// tsBytes := buf[28:37]
+	// n, v := binary.Varint(tsBytes)
+	// fmt.Printf("timestamp retrieved: %d\n", n)
+	// fmt.Printf("error?: %d\n", v)
+	return "0ms"
 }
 
 func calculateChecksum(b []byte) uint16 {
