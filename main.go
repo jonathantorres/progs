@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"time"
@@ -100,8 +101,9 @@ func (p *packet) buildData() []byte {
 	}
 
 	// build packet data
+	rand.Seed(time.Now().UnixNano())
 	for i := garbageDataIdx; i < packSize; i++ {
-		pData[i] = byte(0) // todo: fill with random ascii characters
+		pData[i] = byte(rand.Intn(127))
 	}
 	p.data = pData[headerSize:]
 	csum := calculateChecksum(pData)
