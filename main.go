@@ -15,7 +15,7 @@ import (
 const headerSize = 8
 
 var (
-	packetSize     = 64   // the number of  bytes to be sent, the -s flag can change this
+	packetSize     = 56   // the number of  bytes to be sent, the -s flag can change this
 	recvBufferSize = 1024 // buffer size when receiving replies
 	packetId       = 0    // id for each packet sent
 	numTransmitted = 0    // number of packets sent
