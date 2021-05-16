@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"net"
@@ -88,9 +89,19 @@ func (p *packet) buildData() []byte {
 	pData[4], pData[5] = byte(p.id>>8), byte(p.id)         // id
 	pData[6], pData[7] = byte(p.seqNum>>8), byte(p.seqNum) // seq number
 
+	garbageDataIdx := headerSize
+	packSize := packetSize
+
+	// store the timestamp if we can
+	if packSize >= 8 {
+		b := binary.PutVarint(pData[garbageDataIdx:], time.Now().UnixNano())
+		packSize -= b
+		garbageDataIdx += b
+	}
+
 	// build packet data
-	for i, j := 1, headerSize; i <= packetSize; i, j = i+1, j+1 {
-		pData[j] = byte(0) // todo: fill with random ascii characters
+	for i := garbageDataIdx; i < packSize; i++ {
+		pData[i] = byte(0) // todo: fill with random ascii characters
 	}
 	p.data = pData[headerSize:]
 	csum := calculateChecksum(pData)
@@ -161,7 +172,7 @@ func recvPing(conn net.Conn) {
 // todo: fix this calculation, it only works when bytes with 0 are sent in the payload
 func calculateChecksum(msg []byte) uint16 {
 	// build out the data in 16-bit chunks
-	words := make([]uint16, 0, packetSize/2)
+	words := make([]uint16, 0, (headerSize+packetSize)/2)
 	for i := 0; i < len(msg); i += 2 {
 		l := uint16(msg[i]) << 8
 		word := uint16(l) | uint16(msg[i+1])
