@@ -106,8 +106,7 @@ func (p *packet) buildData() []byte {
 	p.data = pData[headerSize:]
 	csum := calculateChecksum(pData)
 	p.checksum = csum
-	pData[2] = byte(csum >> 8)
-	pData[3] = byte(csum & 255)
+	pData[2], pData[3] = byte(csum&255), byte(csum>>8)
 
 	return pData
 }
@@ -169,19 +168,16 @@ func recvPing(conn net.Conn) {
 	}
 }
 
-// todo: fix this calculation, it only works when bytes with 0 are sent in the payload
-func calculateChecksum(msg []byte) uint16 {
-	// build out the data in 16-bit chunks
-	words := make([]uint16, 0, (headerSize+packetSize)/2)
-	for i := 0; i < len(msg); i += 2 {
-		l := uint16(msg[i]) << 8
-		word := uint16(l) | uint16(msg[i+1])
-		words = append(words, word)
+func calculateChecksum(b []byte) uint16 {
+	csumcv := len(b) - 1 // checksum coverage
+	s := uint32(0)
+	for i := 0; i < csumcv; i += 2 {
+		s += uint32(b[i+1])<<8 | uint32(b[i])
 	}
-	// calculate checksum
-	var csum uint16
-	for _, w := range words {
-		csum = csum + w
+	if csumcv&1 == 0 {
+		s += uint32(b[csumcv])
 	}
-	return ^csum
+	s = s>>16 + s&0xffff
+	s = s + s>>16
+	return ^uint16(s)
 }
