@@ -24,6 +24,7 @@ var (
 	recvBufferSize = 1024 // buffer size when receiving replies
 	packetId       = 0    // id for each packet sent
 	numTransmitted = 0    // number of packets sent
+	numReceived    = 0    // number of packets received
 )
 
 func main() {
@@ -183,6 +184,7 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	raddr := conn.RemoteAddr().String()
 	seq := getPacketSeqNum(buf)
 	packTime := calculatePacketTime(buf)
+	numReceived++
 	fmt.Printf("%d bytes from %s: icmp_seq=%d time=%s\n", bLen, raddr, seq, packTime)
 }
 
