@@ -180,12 +180,15 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	if int(id) != packetId {
 		return
 	}
+	numReceived++
 	bLen := bytesRead - ipHeaderSize
 	raddr := conn.RemoteAddr().String()
 	seq := getPacketSeqNum(buf)
-	packTime := calculatePacketTime(buf)
-	numReceived++
-	fmt.Printf("%d bytes from %s: icmp_seq=%d time=%s\n", bLen, raddr, seq, packTime)
+	packTime, err := calculatePacketTime(buf)
+	fmt.Printf("%d bytes from %s: icmp_seq=%d", bLen, raddr, seq)
+	if err == nil {
+		fmt.Printf(" time=%s\n", packTime)
+	}
 }
 
 func getPacketId(buf []byte) uint16 {
@@ -202,12 +205,15 @@ func getPacketSeqNum(buf []byte) uint16 {
 	return num
 }
 
-func calculatePacketTime(buf []byte) string {
-	// tsBytes := buf[28:37]
-	// n, v := binary.Varint(tsBytes)
-	// fmt.Printf("timestamp retrieved: %d\n", n)
-	// fmt.Printf("error?: %d\n", v)
-	return "0ms"
+func calculatePacketTime(buf []byte) (string, error) {
+	tsBytes := buf[28:37]
+	n, v := binary.Varint(tsBytes)
+	if v <= 0 {
+		return "", fmt.Errorf("error decoding the timestamp: %d\n", v)
+	}
+	now := time.Now().UnixNano()
+	ms := now - n
+	return fmt.Sprintf("%.3fms", float64(ms)/1000000.00), nil
 }
 
 func calculateChecksum(b []byte) uint16 {
