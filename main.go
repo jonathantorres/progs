@@ -15,8 +15,8 @@ import (
 // ICMP echo request message every second and the other receives
 // any echo reply messages that are returned
 const (
-	headerSize   = 8
-	ipHeaderSize = 20
+	icmpHeaderSize = 8
+	ipHeaderSize   = 20
 )
 
 var (
@@ -87,13 +87,13 @@ func newPacket(id uint16, seq uint16) *packet {
 }
 
 func (p *packet) buildData() []byte {
-	pData := make([]byte, headerSize+packetSize)
+	pData := make([]byte, icmpHeaderSize+packetSize)
 	pData[0], pData[1] = byte(p.pType), byte(p.code)       // type and code
 	pData[2], pData[3] = byte(0), byte(0)                  // checksum
 	pData[4], pData[5] = byte(p.id>>8), byte(p.id)         // id
 	pData[6], pData[7] = byte(p.seqNum>>8), byte(p.seqNum) // seq number
 
-	garbageDataIdx := headerSize
+	garbageDataIdx := icmpHeaderSize
 	packSize := packetSize
 
 	// store the timestamp if we can
@@ -108,7 +108,7 @@ func (p *packet) buildData() []byte {
 	for i := garbageDataIdx; i < packSize; i++ {
 		pData[i] = byte(rand.Intn(127))
 	}
-	p.data = pData[headerSize:]
+	p.data = pData[icmpHeaderSize:]
 	csum := calculateChecksum(pData)
 	p.checksum = csum
 	pData[2], pData[3] = byte(csum&255), byte(csum>>8)
