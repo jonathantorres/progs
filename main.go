@@ -196,7 +196,10 @@ func getPacketId(buf []byte) uint16 {
 }
 
 func getPacketSeqNum(buf []byte) uint16 {
-	return uint16(0)
+	seqNum := buf[26:28]
+	num := uint16(seqNum[0]) << 8
+	num |= uint16(seqNum[1])
+	return num
 }
 
 func calculatePacketTime(buf []byte) string {
