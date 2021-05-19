@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -61,11 +63,10 @@ func main() {
 	go pinger(conn)
 	go recvPing(conn)
 
-	// TODO: create signal handler that will terminate
-	// the program when a SIGINT is sent to the process (^C)
-	// simulate wait for now
-	wait := make(chan struct{})
-	<-wait
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
+	<-sig
+	printStats()
 }
 
 type packet struct {
@@ -189,6 +190,10 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	if err == nil {
 		fmt.Printf(" time=%s\n", packTime)
 	}
+}
+
+func printStats() {
+	fmt.Println("Print stats here :)")
 }
 
 func getPacketId(buf []byte) uint16 {
