@@ -152,13 +152,12 @@ func connect(dest string) (net.Conn, error) {
 }
 
 func sendPingPacket(conn net.Conn) error {
-	numTransmitted++
 	pack := newPacket(uint16(packetId), uint16(numTransmitted))
 	_, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("sent %d bytes to %s\n", b, conn.RemoteAddr().String())
+	numTransmitted++
 	return nil
 }
 
