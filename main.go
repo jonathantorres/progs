@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"math"
 	"math/rand"
 	"net"
 	"os"
@@ -28,6 +29,8 @@ var (
 	numTransmitted = 0    // number of packets sent
 	numReceived    = 0    // number of packets received
 )
+
+var transmissionTimes []float64
 
 func main() {
 	flag.Parse()
@@ -58,6 +61,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	transmissionTimes = make([]float64, 0, 15) // arbitrary value
 	packetId = os.Getpid() & 0xffff
 	printPingMessage(destination, solvedDest)
 	go pinger(conn)
@@ -66,7 +70,7 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
 	<-sig
-	printStats()
+	printStats(destination)
 }
 
 type packet struct {
@@ -187,12 +191,52 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	packTime, err := calculatePacketTime(buf)
 	fmt.Printf("%d bytes from %s: icmp_seq=%d", bLen, raddr, seq)
 	if err == nil {
-		fmt.Printf(" time=%s\n", packTime)
+		fmt.Printf(" time=%s\n", fmt.Sprintf("%.3fms", packTime))
+		transmissionTimes = append(transmissionTimes, packTime)
 	}
 }
 
-func printStats() {
-	fmt.Println("Print stats here :)")
+func printStats(destination string) {
+	fmt.Println()
+	fmt.Printf("--- %s ping statistics ---\n", destination)
+	fmt.Printf("%d packets transmitted, %d packets received, %.2f%% packet loss\n", numTransmitted, numReceived, calculatePacketLoss())
+	min, max, avg, stddev := calculateAverages()
+	fmt.Printf("round-trip min/max/avg/stddev = %.3f/%.3f/%.3f/%.3f ms\n", min, max, avg, stddev)
+}
+
+func calculatePacketLoss() float64 {
+	return float64((numTransmitted - numReceived) * 100 / numTransmitted)
+}
+
+func calculateAverages() (float64, float64, float64, float64) {
+	var min, max, avg, stddev float64
+	if len(transmissionTimes) == 0 {
+		return min, max, avg, stddev
+	}
+
+	min = transmissionTimes[0]
+	max = transmissionTimes[0]
+	var sum float64
+	for _, t := range transmissionTimes {
+		sum += t
+		if t < min {
+			min = t
+		}
+		if t > max {
+			max = t
+		}
+	}
+	avg = sum / float64(numReceived)
+
+	// calculate standard deviation
+	var variance float64
+	for _, t := range transmissionTimes {
+		diff := t - avg
+		diff = diff * diff
+		variance += diff
+	}
+	stddev = math.Sqrt(variance / float64(numReceived))
+	return min, max, avg, stddev
 }
 
 func getPacketId(buf []byte) uint16 {
@@ -209,15 +253,15 @@ func getPacketSeqNum(buf []byte) uint16 {
 	return num
 }
 
-func calculatePacketTime(buf []byte) (string, error) {
+func calculatePacketTime(buf []byte) (float64, error) {
 	tsBytes := buf[28:37]
 	n, v := binary.Varint(tsBytes)
 	if v <= 0 {
-		return "", fmt.Errorf("error decoding the timestamp: %d\n", v)
+		return 0.0, fmt.Errorf("error decoding the timestamp: %d\n", v)
 	}
 	now := time.Now().UnixNano()
 	ms := now - n
-	return fmt.Sprintf("%.3fms", float64(ms)/1000000.00), nil
+	return float64(ms) / 1000000.00, nil
 }
 
 func calculateChecksum(b []byte) uint16 {
