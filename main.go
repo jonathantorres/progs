@@ -30,6 +30,8 @@ var (
 	numReceived    = 0    // number of packets received
 )
 
+var countF = flag.Int("c", 0, "Stop after sending -c packets")
+
 var transmissionTimes []float64
 
 func main() {
@@ -64,11 +66,11 @@ func main() {
 	transmissionTimes = make([]float64, 0, 15) // arbitrary value
 	packetId = os.Getpid() & 0xffff
 	printPingMessage(destination, solvedDest)
-	go pinger(conn)
-	go recvPing(conn)
-
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
+	go pinger(conn)
+	go recvPing(conn, sig)
+
 	<-sig
 	printStats(destination)
 }
@@ -141,6 +143,9 @@ func pinger(conn net.Conn) {
 			break
 		}
 		time.Sleep(1 * time.Second)
+		if *countF > 0 && numReceived >= *countF {
+			break
+		}
 	}
 }
 
@@ -165,7 +170,7 @@ func sendPingPacket(conn net.Conn) error {
 	return nil
 }
 
-func recvPing(conn net.Conn) {
+func recvPing(conn net.Conn, sig chan<- os.Signal) {
 	// this will receive the reply messages from the echo requests
 	buf := make([]byte, recvBufferSize)
 	for {
@@ -175,6 +180,10 @@ func recvPing(conn net.Conn) {
 			continue
 		}
 		printReceivedPacket(buf, b, conn)
+		if *countF > 0 && numReceived >= *countF {
+			sig <- syscall.SIGQUIT
+			break
+		}
 	}
 }
 
