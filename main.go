@@ -32,6 +32,7 @@ var (
 
 var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
+var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
 
 var transmissionTimes []float64
 
@@ -181,7 +182,7 @@ func recvPing(conn net.Conn, sig chan<- os.Signal) {
 			continue
 		}
 		printReceivedPacket(buf, b, conn)
-		if *countF > 0 && numReceived >= *countF {
+		if (*countF > 0 && numReceived >= *countF) || (*exitF && numReceived >= 1) {
 			sig <- syscall.SIGQUIT
 			break
 		}
