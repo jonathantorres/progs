@@ -191,7 +191,7 @@ func recvPing(conn net.Conn, sig chan<- os.Signal) {
 	// this will receive the reply messages from the echo requests
 	buf := make([]byte, recvBufferSize)
 	for {
-		if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+		if err := conn.SetReadDeadline(time.Now().Add(time.Duration((*waitF * 2)) * time.Second)); err != nil {
 			fmt.Fprintf(os.Stderr, "deadline error: %s\n", err)
 			continue
 		}
