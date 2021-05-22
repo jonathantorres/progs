@@ -18,21 +18,23 @@ import (
 // ICMP echo request message every second and the other receives
 // any echo reply messages that are returned
 const (
-	icmpHeaderSize = 8
-	ipHeaderSize   = 20
+	icmpHeaderSize    = 8
+	ipHeaderSize      = 20
+	defaultPacketSize = 56
 )
 
 var (
-	packetSize     = 56   // the number of  bytes to be sent, the -s flag can change this
-	recvBufferSize = 1024 // buffer size when receiving replies
-	packetId       = 0    // id for each packet sent
-	numTransmitted = 0    // number of packets sent
-	numReceived    = 0    // number of packets received
+	packetSize     = defaultPacketSize // the number of  bytes to be sent, the -s flag can change this
+	recvBufferSize = 1024              // buffer size when receiving replies
+	packetId       = 0                 // id for each packet sent
+	numTransmitted = 0                 // number of packets sent
+	numReceived    = 0                 // number of packets received
 )
 
 var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
+var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
 
 var transmissionTimes []float64
 
@@ -63,6 +65,10 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "zing: error connecting: %s\n", err)
 		os.Exit(1)
+	}
+
+	if *packetSizeF != defaultPacketSize {
+		packetSize = *packetSizeF
 	}
 
 	transmissionTimes = make([]float64, 0, 15) // arbitrary value
