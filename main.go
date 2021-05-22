@@ -31,6 +31,7 @@ var (
 )
 
 var countF = flag.Int("c", 0, "Stop after sending -c packets")
+var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 
 var transmissionTimes []float64
 
@@ -142,7 +143,7 @@ func pinger(conn net.Conn) {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err)
 			break
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(*waitF) * time.Second)
 		if *countF > 0 && numReceived >= *countF {
 			break
 		}
