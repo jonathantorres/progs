@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"errors"
 	"flag"
 	"fmt"
 	"math"
@@ -190,9 +191,17 @@ func recvPing(conn net.Conn, sig chan<- os.Signal) {
 	// this will receive the reply messages from the echo requests
 	buf := make([]byte, recvBufferSize)
 	for {
+		if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+			fmt.Fprintf(os.Stderr, "deadline error: %s\n", err)
+			continue
+		}
 		b, err := conn.Read(buf)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			if errors.Is(err, os.ErrDeadlineExceeded) {
+				fmt.Fprintf(os.Stderr, "Request timeout\n")
+			} else {
+				fmt.Fprintf(os.Stderr, "read error: %s\n", err)
+			}
 			continue
 		}
 		printReceivedPacket(buf, b, conn)
