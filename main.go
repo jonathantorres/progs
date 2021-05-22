@@ -37,15 +37,19 @@ var timeoutF = flag.Int("t", 0, "Timeout, in seconds before zing exits regardles
 var transmissionTimes []float64
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of zing:\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	if len(flag.Args()) == 0 {
 		fmt.Fprintf(os.Stderr, "zing: a destination must be specified\n")
-		printUsage()
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	if len(flag.Args()) > 1 {
 		fmt.Fprintf(os.Stderr, "zing: only 1 destination must be specified\n")
-		printUsage()
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	destination := flag.Args()[0]
@@ -140,10 +144,6 @@ func printPingMessage(destination, solvedDest string) {
 		fmt.Fprintf(os.Stdout, "(%s)", solvedDest)
 	}
 	fmt.Fprintf(os.Stdout, " %d bytes of data.\n", packetSize)
-}
-
-func printUsage() {
-	// TODO
 }
 
 func timeout(sig chan os.Signal) {
