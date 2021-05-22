@@ -15,32 +15,31 @@ const (
 	defaultPrefix   = "/usr/local/voy"
 	defaultConfFile = defaultPrefix + "/conf/voy.conf"
 	defaultLogFile  = defaultPrefix + "/log/voy.log"
-	versionFlagDesc = "print current version"
-	confFlagDesc    = "specify the location of the configuration file"
-	logFlagDesc     = "specify the location of the log file"
+	versionFDesc    = "print current version"
+	confFDesc       = "specify the location of the configuration file"
+	logFDesc        = "specify the location of the log file"
 )
 
-var versionFlag bool
-var confFlag string
-var logFlag string
-
-func init() {
-	flag.BoolVar(&versionFlag, "version", false, versionFlagDesc)
-	flag.BoolVar(&versionFlag, "v", false, versionFlagDesc+"(shorthand)")
-	flag.StringVar(&confFlag, "conf", defaultConfFile, confFlagDesc)
-	flag.StringVar(&confFlag, "c", defaultConfFile, confFlagDesc+"(shorthand)")
-	flag.StringVar(&logFlag, "log", defaultLogFile, logFlagDesc)
-	flag.StringVar(&logFlag, "l", defaultLogFile, logFlagDesc+"(shorthand)")
-}
-
 func main() {
+	var (
+		versionF bool
+		confF    string
+		logF     string
+	)
+	flag.BoolVar(&versionF, "version", false, versionFDesc)
+	flag.BoolVar(&versionF, "v", false, versionFDesc+"(shorthand)")
+	flag.StringVar(&confF, "conf", defaultConfFile, confFDesc)
+	flag.StringVar(&confF, "c", defaultConfFile, confFDesc+"(shorthand)")
+	flag.StringVar(&logF, "log", defaultLogFile, logFDesc)
+	flag.StringVar(&logF, "l", defaultLogFile, logFDesc+"(shorthand)")
 	flag.Parse()
-	if versionFlag {
+
+	if versionF {
 		fmt.Fprintf(os.Stdout, "voy server v%s\n", voy.Version)
 		os.Exit(0)
 	}
 	// TODO: initialize logging mechanism
-	c, err := conf.Load(confFlag)
+	c, err := conf.Load(confF)
 	if err != nil {
 		log.Fatalf("%s, exiting...", err)
 	}
