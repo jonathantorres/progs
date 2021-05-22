@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-// Send a packet (ICMP echo request) every second, and wait for a reply
-// The ping program contains two logical portions: one transmits an
-// ICMP echo request message every second and the other receives
-// any echo reply messages that are returned
 const (
 	icmpHeaderSize    = 8
 	ipHeaderSize      = 20
