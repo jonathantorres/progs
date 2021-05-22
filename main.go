@@ -31,6 +31,7 @@ var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
 var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
+var timeoutF = flag.Int("t", 0, "Timeout, in seconds before zing exits regardless of how many packets have been received")
 
 var transmissionTimes []float64
 
@@ -74,6 +75,10 @@ func main() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
 	go pinger(conn)
 	go recvPing(conn, sig)
+
+	if *timeoutF > 0 {
+		go timeout(sig)
+	}
 
 	<-sig
 	printStats(destination)
@@ -138,6 +143,13 @@ func printPingMessage(destination, solvedDest string) {
 
 func printUsage() {
 	// TODO
+}
+
+func timeout(sig chan os.Signal) {
+	select {
+	case <-time.After(time.Duration(*timeoutF) * time.Second):
+		sig <- syscall.SIGQUIT
+	}
 }
 
 func pinger(conn net.Conn) {
