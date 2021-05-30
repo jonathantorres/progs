@@ -32,14 +32,22 @@ func Start(conf *conf.Conf) error {
 				return
 			}
 			log.Printf("goroutine listening on %d", port)
-			for {
-				conn, err := l.Accept()
-				if err != nil {
-					log.Print(err)
-					continue
-				}
-				go handleConn(conn)
+			var lwg sync.WaitGroup
+			for i := 0; i < 5; i++ { // this number should be configurable
+				lwg.Add(1)
+				go func(l net.Listener) {
+					defer lwg.Done()
+					for {
+						conn, err := l.Accept()
+						if err != nil {
+							log.Print(err)
+							continue
+						}
+						go handleConn(conn)
+					}
+				}(l)
 			}
+			lwg.Wait()
 			l.Close()
 			log.Printf("goroutine done")
 		}(p)
