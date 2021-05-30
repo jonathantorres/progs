@@ -68,7 +68,9 @@ func sigHandler() {
 	select {
 	case <-sigShutdown:
 		// TODO: shutdown the server
+		os.Exit(0)
 	case <-sigReload:
 		// TODO: reload configuration files
+		os.Exit(0)
 	}
 }
