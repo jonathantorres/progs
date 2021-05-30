@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/jonathantorres/voy/internal/conf"
 	"github.com/jonathantorres/voy/internal/server"
@@ -39,11 +41,34 @@ func main() {
 		os.Exit(0)
 	}
 	// TODO: initialize logging mechanism
+	// TODO: figure out which path to use for the configuration file
+	// either from the -conf option, or configured from the build
+	// the -conf option would override any location set in the build
 	c, err := conf.Load(confF)
 	if err != nil {
 		log.Fatalf("%s, exiting...", err)
 	}
+	go sigHandler()
+	// start the server
 	if err := server.Start(c); err != nil {
 		log.Fatalf("%s, exiting...", err)
+	}
+}
+
+func sigHandler() {
+	// TODO: goroutine that will be waiting for any signals
+	// that will tell the server to
+	// reload the configuration files (HUP)
+	// or to gracefully shutdown (TERM, INT, QUIT)
+	sigShutdown := make(chan os.Signal, 1)
+	signal.Notify(sigShutdown, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	sigReload := make(chan os.Signal, 1)
+	signal.Notify(sigShutdown, syscall.SIGHUP)
+
+	select {
+	case <-sigShutdown:
+		// TODO: shutdown the server
+	case <-sigReload:
+		// TODO: reload configuration files
 	}
 }
