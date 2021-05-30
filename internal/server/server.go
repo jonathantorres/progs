@@ -150,7 +150,7 @@ func writeErrResponse(conn net.Conn, code int) {
 }
 
 func getPortsToListen(conf *conf.Conf) ([]int, error) {
-	foundPorts := make([]int, 0)
+	foundPorts := make([]int, 0, 5)
 	if conf.DefaultServer != nil {
 		for _, p := range conf.DefaultServer.Ports {
 			foundPorts = append(foundPorts, p)
@@ -169,7 +169,7 @@ func getPortsToListen(conf *conf.Conf) ([]int, error) {
 		return nil, errors.New("no ports to listen")
 	}
 	// don't allow duplicated port numbers
-	ports := make([]int, 0)
+	ports := make([]int, 0, len(foundPorts))
 	for _, fp := range foundPorts {
 		portFound := false
 		if len(ports) > 0 {
