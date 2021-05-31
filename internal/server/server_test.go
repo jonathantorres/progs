@@ -49,6 +49,7 @@ func TestSimplePostRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error sending GET request: %s\n", err)
 	}
+	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		t.Fatalf("expected a 200 response, got: %d\n", res.StatusCode)
 	}
