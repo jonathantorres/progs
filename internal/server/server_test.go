@@ -60,7 +60,26 @@ func TestSimplePostRequest(t *testing.T) {
 }
 
 func TestLargePostRequest(t *testing.T) {
-	// TODO: send a POST request with a large amount of data
+	cmd, err := startServer("testdata/voy.conf")
+	if err != nil {
+		t.Fatalf("server could not be started: %s\n", err)
+	}
+	f, err := os.Open("internal/server/testdata/post_data.txt")
+	if err != nil {
+		t.Fatalf("%s\n", err)
+	}
+	res, err := http.Post("http://localhost:8081", "text/plain", f)
+	if err != nil {
+		t.Fatalf("error sending POST request: %s\n", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		t.Fatalf("expected a 200 response, got: %d\n", res.StatusCode)
+	}
+	err = stopServer(cmd)
+	if err != nil {
+		t.Fatalf("server could not be stopped: %s\n", err)
+	}
 }
 
 func TestGetPortsToListen(t *testing.T) {
