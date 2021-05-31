@@ -47,7 +47,7 @@ func TestSimplePostRequest(t *testing.T) {
 
 	res, err := http.PostForm("http://localhost:8081", postData)
 	if err != nil {
-		t.Fatalf("error sending GET request: %s\n", err)
+		t.Fatalf("error sending POST request: %s\n", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
