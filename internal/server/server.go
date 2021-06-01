@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"sync"
@@ -66,10 +67,14 @@ func handleConn(conn net.Conn) {
 		}
 		curReqData := make([]byte, buffSize)
 		br, err := conn.Read(curReqData)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			log.Printf("conn.Read error: %s, read %d bytes\n", err, br)
 			bufErr = err
 			// TODO: handle this error somehow (send error response?)
+			break
+		}
+		if br == 0 {
+			bufErr = errors.New("no bytes read")
 			break
 		}
 		log.Printf("read %d bytes", br)
