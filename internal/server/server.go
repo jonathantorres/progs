@@ -67,7 +67,7 @@ func handleConn(conn net.Conn) {
 		curReqData := make([]byte, buffSize)
 		br, err := conn.Read(curReqData)
 		if err != nil {
-			log.Println(err)
+			log.Printf("conn.Read error: %s, read %d bytes\n", err, br)
 			bufErr = err
 			// TODO: handle this error somehow (send error response?)
 			break
@@ -76,7 +76,7 @@ func handleConn(conn net.Conn) {
 		if !req.LineIsRead {
 			err = req.ReadLine(&curReqData)
 			if err != nil {
-				log.Println(err)
+				log.Printf("req.ReadLine error: %s\n", err)
 				bufErr = err
 				// TODO: handle this error somehow (send error response?)
 				break
@@ -85,7 +85,7 @@ func handleConn(conn net.Conn) {
 		if !req.HeadersAreRead {
 			err = req.ReadHeaders(&curReqData)
 			if err != nil {
-				log.Println(err)
+				log.Printf("req.ReadHeaders error: %s\n", err)
 				bufErr = err
 				// TODO: handle this error somehow (send error response?)
 				break
@@ -94,7 +94,7 @@ func handleConn(conn net.Conn) {
 		if !req.BodyIsRead {
 			err = req.ReadBody(&curReqData, br)
 			if err != nil {
-				log.Println(err)
+				log.Printf("req.ReadBody error: %s\n", err)
 				bufErr = err
 				// TODO: handle this error somehow (send error response?)
 				break
@@ -108,7 +108,7 @@ func handleConn(conn net.Conn) {
 		} else {
 			writeErrResponse(conn, http.StatusInternalServerError)
 		}
-		log.Println(bufErr)
+		log.Printf("bufErr: %s\n", bufErr)
 		return
 	}
 
@@ -116,7 +116,7 @@ func handleConn(conn net.Conn) {
 	code, headers, body, err := processRequest(req)
 	if err != nil {
 		// TODO: Handle any errors to the client here :)
-		log.Println(err)
+		log.Printf("processRequest error: %s\n", err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func handleConn(conn net.Conn) {
 	written, err := conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
 		writeErrResponse(conn, http.StatusInternalServerError)
-		log.Println(err)
+		log.Printf("conn.Write error: %s\n", err)
 	}
 	log.Printf("request processed %d bytes written", written)
 	log.Printf("HTTP/%d.%d %d %s", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message)
