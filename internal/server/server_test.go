@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -75,6 +76,36 @@ func TestLargePostRequest(t *testing.T) {
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
 		t.Fatalf("expected a 200 response, got: %d\n", res.StatusCode)
+	}
+	err = stopServer(cmd)
+	if err != nil {
+		t.Fatalf("server could not be stopped: %s\n", err)
+	}
+}
+
+func TestLargeRequestLine(t *testing.T) {
+	cmd, err := startServer("testdata/voy.conf")
+	if err != nil {
+		t.Fatalf("server could not be started: %s\n", err)
+	}
+	url := `http://localhost:8081/vod/FetchOrderDetails?itemId=233756825167&transactionId=1921811535013&mkevt=1&mkpid=0&emsid=e11401.m43700.l49689&mkcid=7&ch=osgood&euid=cd3dbb358e3b4633b21e32c5e7b1ded2&bu=43783229363&exe=98631&ext=232562&some1=43783229363&test1=1234567789898232&tryid=12938129381293812938&console=912839812938123&logid=nqt%3DAAAAEAAAACAgAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAgAAAQAAAAAAAACAAAAgAAAAAgAAAAAAAAAAAAAAAgA**%26nqc%3DAAAAEAAAACAgAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAgAAAQAAAAAAAACAAAAgAAAAAgAAAAAAAAAAAAAAAgA**%26mdbreftime%3D1622479417918%26es%3D0%26ec%3D1&osub=-1~1&crd=20210531095122&segname=11401&sojTags=ch%3Dch%2Cbu%3Dbu%2Cnqt%3Dnqt%2Cnqc%3Dnqc%2Cmdbreftime%3Dmdbreftime%2Ces%3Des%2Cec%3Dec%2Cexe%3Dexe%2Cext%3Dext%2Cexe%3Dexe%2Cext%3Dext%2Cosub%3Dosub%2Ccrd%3Dcrd%2Csegname%3Dsegname%2Cchnl%3Dmkcid`
+	res, err := http.Get(url)
+	if err != nil {
+		t.Fatalf("error sending GET request: %s\n", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		t.Fatalf("expected a 200 response, got: %d\n", res.StatusCode)
+	}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("error reading response body: %s\n", err)
+	}
+	if string(b) != "Hello, world" {
+		t.Fatalf("incorrect response body, got %s but want %s\n", string(b), "Hello, world")
+	}
+	if res.ContentLength != int64(len("Hello, world")) {
+		t.Fatalf("content length of response does not match, got %d want %d\n", res.ContentLength, len("Hello, world"))
 	}
 	err = stopServer(cmd)
 	if err != nil {
