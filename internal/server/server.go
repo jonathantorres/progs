@@ -1,9 +1,9 @@
 package server
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"sync"
@@ -14,8 +14,6 @@ import (
 
 // starts the server process and handles every request sent to it
 // handles server start, restart and shutdown
-
-const buffSize = 1024
 
 func Start(conf *conf.Conf) error {
 	ports, err := getPortsToListen(conf)
@@ -59,61 +57,15 @@ func Start(conf *conf.Conf) error {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	req := &http.Request{}
-	var bufErr error
-	for {
-		if req.DoneReading {
-			break
-		}
-		curReqData := make([]byte, buffSize)
-		br, err := conn.Read(curReqData)
-		if err != nil && err != io.EOF {
-			log.Printf("conn.Read error: %s, read %d bytes\n", err, br)
-			bufErr = err
-			// TODO: handle this error somehow (send error response?)
-			break
-		}
-		if br == 0 {
-			bufErr = errors.New("no bytes read")
-			break
-		}
-		log.Printf("read %d bytes", br)
-		if !req.LineIsRead {
-			err = req.ReadLine(&curReqData)
-			if err != nil {
-				log.Printf("req.ReadLine error: %s\n", err)
-				bufErr = err
-				// TODO: handle this error somehow (send error response?)
-				break
-			}
-		}
-		if !req.HeadersAreRead {
-			err = req.ReadHeaders(&curReqData)
-			if err != nil {
-				log.Printf("req.ReadHeaders error: %s\n", err)
-				bufErr = err
-				// TODO: handle this error somehow (send error response?)
-				break
-			}
-		}
-		if !req.BodyIsRead {
-			err = req.ReadBody(&curReqData, br)
-			if err != nil {
-				log.Printf("req.ReadBody error: %s\n", err)
-				bufErr = err
-				// TODO: handle this error somehow (send error response?)
-				break
-			}
-		}
-	}
-
-	if bufErr != nil {
-		if errors.Is(bufErr, http.ErrInvalidRequestLine) {
+	req := http.NewRequest(conn)
+	err := req.Parse()
+	if err != nil {
+		// TODO: FIX!
+		if errors.Is(err, http.ErrInvalidRequestLine) {
 			writeErrResponse(conn, http.StatusBadRequest)
 		} else {
 			writeErrResponse(conn, http.StatusInternalServerError)
 		}
-		log.Printf("bufErr: %s\n", bufErr)
 		return
 	}
 
@@ -189,4 +141,12 @@ func getPortsToListen(conf *conf.Conf) ([]int, error) {
 		}
 	}
 	return ports, nil
+}
+
+func readTheLine(b []byte) bool {
+	res := bytes.Split(b, []byte(" "))
+	if len(res) == 3 {
+		return true
+	}
+	return false
 }

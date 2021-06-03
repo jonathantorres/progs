@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"io"
+	"log"
+	"net/textproto"
 	"strconv"
 	"unicode"
 )
@@ -20,9 +23,44 @@ type Request struct {
 	HeadersAreRead     bool
 	BodyIsRead         bool
 	totalBodyBytesRead int
+	r                  io.Reader
+	tr                 *textproto.Reader
 }
 
 var ErrInvalidRequestLine = errors.New("invalid request line")
+
+const buffSize = 1024
+
+func NewRequest(r io.Reader) *Request {
+	tr := textproto.NewReader(bufio.NewReaderSize(r, buffSize))
+	return &Request{
+		r:  r,
+		tr: tr,
+	}
+}
+
+func (r *Request) Parse() error {
+	if r.r == nil || r.tr == nil {
+		return errors.New("a reader must be specified")
+	}
+	// TODO: move this to a method (maybe parseRequestLine)
+	b, err := r.tr.ReadLineBytes()
+	if err != nil {
+		return err
+	}
+	log.Printf("req line: %s\n", string(b))
+
+	// TODO: move this to a method (maybe parseRequestHeaders)
+	h, err := r.tr.ReadMIMEHeader()
+	if err != nil {
+		return err
+	}
+	log.Printf("headers read: %v\n", h)
+
+	// TODO: also do something with the request body
+	// of course, only if this is a POST request
+	return nil
+}
 
 // TODO: In here we are always assuming that the buffer
 // contains the entire request line
@@ -168,7 +206,7 @@ func (r *Request) ReadBody(reqData *[]byte, bytesRead int) error {
 	return nil
 }
 
-func NewRequest(reqData []byte) (*Request, error) {
+func NewRequestOld(reqData []byte) (*Request, error) {
 	method, uri, major, minor, err := parseRequestLine(&reqData)
 	if err != nil {
 		return nil, err
