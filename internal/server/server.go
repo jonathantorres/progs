@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -141,12 +140,4 @@ func getPortsToListen(conf *conf.Conf) ([]int, error) {
 		}
 	}
 	return ports, nil
-}
-
-func readTheLine(b []byte) bool {
-	res := bytes.Split(b, []byte(" "))
-	if len(res) == 3 {
-		return true
-	}
-	return false
 }
