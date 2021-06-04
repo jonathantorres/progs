@@ -10,6 +10,10 @@ import (
 	"unicode"
 )
 
+var ErrInvalidRequestLine = errors.New("invalid request line")
+
+const buffSize = 1024
+
 type Request struct {
 	Method             string
 	Uri                string
@@ -26,18 +30,6 @@ type Request struct {
 	BodyNew            io.Reader
 	r                  io.Reader
 	tr                 *textproto.Reader
-}
-
-var ErrInvalidRequestLine = errors.New("invalid request line")
-
-const buffSize = 1024
-
-func NewRequest(r io.Reader) *Request {
-	tr := textproto.NewReader(bufio.NewReaderSize(r, buffSize))
-	return &Request{
-		r:  r,
-		tr: tr,
-	}
 }
 
 func (r *Request) Parse() error {
@@ -101,6 +93,14 @@ func (r *Request) parseRequestHeaders() error {
 	// log.Printf("headers read: %v\n", h)
 	r.HeadersNew = h
 	return nil
+}
+
+func NewRequest(r io.Reader) *Request {
+	tr := textproto.NewReader(bufio.NewReaderSize(r, buffSize))
+	return &Request{
+		r:  r,
+		tr: tr,
+	}
 }
 
 // TODO: In here we are always assuming that the buffer
