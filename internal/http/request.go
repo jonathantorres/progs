@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"log"
 	"net/textproto"
 	"strconv"
 	"unicode"
@@ -90,7 +89,7 @@ func (r *Request) parseRequestLine() error {
 		}
 	}
 	r.HTTPVersionMajor, r.HTTPVersionMinor = major, minor
-	log.Printf("req line: %s\n", string(b))
+	// log.Printf("req line: %s\n", string(b))
 	return nil
 }
 
@@ -99,7 +98,7 @@ func (r *Request) parseRequestHeaders() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("headers read: %v\n", h)
+	// log.Printf("headers read: %v\n", h)
 	r.HeadersNew = h
 	return nil
 }

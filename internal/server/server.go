@@ -68,22 +68,20 @@ func handleConn(conn net.Conn) {
 		return
 	}
 
-	log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
+	// log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
 	code, headers, body, err := processRequest(req)
 	if err != nil {
-		// TODO: Handle any errors to the client here :)
-		log.Printf("processRequest error: %s\n", err)
+		writeErrResponse(conn, http.StatusInternalServerError)
 		return
 	}
 
 	res := http.NewResponse(code, headers, body)
-	written, err := conn.Write(http.BuildResponseBytes(res))
+	_, err = conn.Write(http.BuildResponseBytes(res))
 	if err != nil {
 		writeErrResponse(conn, http.StatusInternalServerError)
-		log.Printf("conn.Write error: %s\n", err)
+		return
 	}
-	log.Printf("request processed %d bytes written", written)
-	log.Printf("HTTP/%d.%d %d %s", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message)
+	// log.Printf("HTTP/%d.%d %d %s", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message)
 }
 
 func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
