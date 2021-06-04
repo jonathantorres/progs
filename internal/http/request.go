@@ -24,6 +24,7 @@ type Request struct {
 	HeadersAreRead     bool
 	BodyIsRead         bool
 	totalBodyBytesRead int
+	BodyNew            io.Reader
 	r                  io.Reader
 	tr                 *textproto.Reader
 }
@@ -50,8 +51,9 @@ func (r *Request) Parse() error {
 	if err := r.parseRequestHeaders(); err != nil {
 		return err
 	}
-	// TODO: also do something with the request body
-	// of course, only if this is a POST request
+	if r.Method == RequestMethodPost {
+		r.BodyNew = r.tr.R
+	}
 	return nil
 }
 
