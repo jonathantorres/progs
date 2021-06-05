@@ -95,8 +95,8 @@ func TestParsingOfHeaders(t *testing.T) {
 		if err != nil && err != io.EOF {
 			t.Fatalf(err.Error())
 		}
-		if !reflect.DeepEqual(req.HeadersNew, textproto.MIMEHeader(c.headers)) {
-			t.Fatalf("headers from payload#%d are not equal, got %v but want %v", i+1, req.HeadersNew, c.headers)
+		if !reflect.DeepEqual(req.Headers, textproto.MIMEHeader(c.headers)) {
+			t.Fatalf("headers from payload#%d are not equal, got %v but want %v", i+1, req.Headers, c.headers)
 		}
 	}
 }
