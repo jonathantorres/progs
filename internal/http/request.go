@@ -50,7 +50,7 @@ func (r *Request) Parse() error {
 
 func (r *Request) parseRequestLine() error {
 	b, err := r.tr.ReadLineBytes()
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return err
 	}
 	line := bytes.Split(b, []byte(" "))
@@ -87,7 +87,7 @@ func (r *Request) parseRequestLine() error {
 
 func (r *Request) parseRequestHeaders() error {
 	h, err := r.tr.ReadMIMEHeader()
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return err
 	}
 	// log.Printf("headers read: %v\n", h)
