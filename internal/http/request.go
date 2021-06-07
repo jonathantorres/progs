@@ -27,7 +27,7 @@ type Request struct {
 
 func (r *Request) Parse() error {
 	if r.r == nil || r.tr == nil {
-		return errors.New("a reader must be specified")
+		panic("a reader must be specified")
 	}
 	if err := r.parseRequestLine(); err != nil {
 		return err
