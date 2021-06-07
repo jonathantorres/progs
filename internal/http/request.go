@@ -7,13 +7,19 @@ import (
 	"io"
 	"net/textproto"
 	"net/url"
+	"regexp"
 	"strconv"
 	"unicode"
 )
 
-var ErrInvalidRequestLine = errors.New("invalid request line")
-var ErrInvalidRequestMethod = errors.New("invalid request method")
-var ErrRequestBodyRequired = errors.New("request body required")
+var (
+	ErrInvalidRequestLine      = errors.New("invalid request line")
+	ErrInvalidRequestMethod    = errors.New("invalid request method")
+	ErrInvalidHTTPVersion      = errors.New("invalid http version")
+	ErrRequestBodyRequired     = errors.New("request body required")
+	ErrHTTPVersionNotSupported = errors.New("http version not supported")
+)
+var httpRegex = regexp.MustCompile(`HTTP\/\d{1}\.\d{1}`)
 
 const buffSize = 1024
 
@@ -67,8 +73,6 @@ func (r *Request) parseRequestLine() error {
 	if err = r.validateURI(); err != nil {
 		return err
 	}
-	// TODO: validate the HTTP version,
-	// it should be a valid one supported by the server
 	// parse the HTTP version
 	var major, minor int
 	for _, char := range line[2] {
@@ -76,17 +80,22 @@ func (r *Request) parseRequestLine() error {
 			if major == 0 {
 				major, err = strconv.Atoi(string(char))
 				if err != nil {
-					return ErrInvalidRequestLine
+					return ErrInvalidHTTPVersion
 				}
 			} else {
 				minor, err = strconv.Atoi(string(char))
 				if err != nil {
-					return ErrInvalidRequestLine
+					return ErrInvalidHTTPVersion
 				}
 			}
 		}
 	}
 	r.HTTPVersionMajor, r.HTTPVersionMinor = major, minor
+	// validate the HTTP version,
+	// it should be a valid one supported by the server
+	if err = r.validateHTTPVersion(string(line[2])); err != nil {
+		return err
+	}
 	// log.Printf("req line: %s\n", string(b))
 	return nil
 }
@@ -126,6 +135,22 @@ func (r *Request) validateMethod() error {
 func (r *Request) validateURI() error {
 	if _, err := url.ParseRequestURI(r.Uri); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Request) validateHTTPVersion(v string) error {
+	if r.HTTPVersionMajor > 1 {
+		return ErrHTTPVersionNotSupported
+	}
+	if r.HTTPVersionMajor == 0 && r.HTTPVersionMinor != 9 {
+		return ErrHTTPVersionNotSupported
+	}
+	if r.HTTPVersionMinor > 1 {
+		return ErrHTTPVersionNotSupported
+	}
+	if ok := httpRegex.MatchString(v); !ok {
+		return ErrInvalidHTTPVersion
 	}
 	return nil
 }
