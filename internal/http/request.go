@@ -6,11 +6,14 @@ import (
 	"errors"
 	"io"
 	"net/textproto"
+	"net/url"
 	"strconv"
 	"unicode"
 )
 
 var ErrInvalidRequestLine = errors.New("invalid request line")
+var ErrInvalidRequestMethod = errors.New("invalid request method")
+var ErrRequestBodyRequired = errors.New("request body required")
 
 const buffSize = 1024
 
@@ -54,10 +57,16 @@ func (r *Request) parseRequestLine() error {
 	if len(line) != 3 {
 		return ErrInvalidRequestLine
 	}
-	// TODO: validate the request method
-	// TODO: should we validate the request uri?
 	r.Method, r.Uri = string(line[0]), string(line[1])
 
+	// validate the request method
+	if err = r.validateMethod(); err != nil {
+		return err
+	}
+	// validate the request uri
+	if err = r.validateURI(); err != nil {
+		return err
+	}
 	// TODO: validate the HTTP version,
 	// it should be a valid one supported by the server
 	// parse the HTTP version
@@ -89,6 +98,35 @@ func (r *Request) parseRequestHeaders() error {
 	}
 	// log.Printf("headers read: %v\n", h)
 	r.Headers = h
+	return nil
+}
+
+func (r *Request) validateMethod() error {
+	switch r.Method {
+	case RequestMethodGet:
+	case RequestMethodHead:
+	case RequestMethodPut:
+	case RequestMethodDelete:
+	case RequestMethodTrace:
+	case RequestMethodOptions:
+	case RequestMethodConnect:
+	case RequestMethodPatch:
+		// everything ok, this request method is allowed
+		return nil
+
+	case RequestMethodPost:
+		if r.Body == nil {
+			return ErrRequestBodyRequired
+		}
+		return nil
+	}
+	return ErrInvalidRequestMethod
+}
+
+func (r *Request) validateURI() error {
+	if _, err := url.ParseRequestURI(r.Uri); err != nil {
+		return err
+	}
 	return nil
 }
 
