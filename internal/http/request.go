@@ -112,14 +112,14 @@ func (r *Request) parseRequestHeaders() error {
 
 func (r *Request) validateMethod() error {
 	switch r.Method {
-	case RequestMethodGet:
-	case RequestMethodHead:
-	case RequestMethodPut:
-	case RequestMethodDelete:
-	case RequestMethodTrace:
-	case RequestMethodOptions:
-	case RequestMethodConnect:
-	case RequestMethodPatch:
+	case RequestMethodGet,
+		RequestMethodHead,
+		RequestMethodPut,
+		RequestMethodDelete,
+		RequestMethodTrace,
+		RequestMethodOptions,
+		RequestMethodConnect,
+		RequestMethodPatch:
 		// everything ok, this request method is allowed
 		return nil
 
