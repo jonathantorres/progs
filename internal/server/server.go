@@ -31,7 +31,9 @@ func Start(conf *conf.Conf) error {
 			}
 			log.Printf("goroutine listening on %d", port)
 			var lwg sync.WaitGroup
-			for i := 0; i < 5; i++ { // this number should be configurable
+			// TODO: this number (5) should be configurable
+			// these are the working goroutines that will listen to upcoming requests
+			for i := 0; i < 5; i++ {
 				lwg.Add(1)
 				go func(l net.Listener) {
 					defer lwg.Done()
