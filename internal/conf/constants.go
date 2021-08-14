@@ -19,4 +19,5 @@ const (
 	accessLogOption = "access_log"
 	includeOption   = "include"
 	vhostOption     = "vhost"
+	workersOption   = "workers"
 )

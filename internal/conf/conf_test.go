@@ -45,8 +45,9 @@ func TestSyntaxErrorsAreFound(t *testing.T) {
 
 func TestServerConfIsBuilt(t *testing.T) {
 	wantConf := Conf{
-		User:  "www-data",
-		Group: "www-data",
+		User:    "www-data",
+		Group:   "www-data",
+		Workers: 5,
 		DefaultServer: &ServerConf{
 			Names:      []string{"localhost"},
 			Root:       "/var/www/localhost",

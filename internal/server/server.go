@@ -31,9 +31,7 @@ func Start(conf *conf.Conf) error {
 			}
 			log.Printf("goroutine listening on %d", port)
 			var lwg sync.WaitGroup
-			// TODO: this number (5) should be configurable
-			// these are the working goroutines that will listen to upcoming requests
-			for i := 0; i < 5; i++ {
+			for i := 0; i < conf.Workers; i++ {
 				lwg.Add(1)
 				go func(l net.Listener) {
 					defer lwg.Done()
@@ -70,7 +68,6 @@ func handleConn(conn net.Conn) {
 		return
 	}
 
-	// log.Printf("%s %s HTTP/%d.%d", req.Method, req.Uri, req.HTTPVersionMajor, req.HTTPVersionMinor)
 	code, headers, body, err := processRequest(req)
 	if err != nil {
 		writeErrResponse(conn, http.StatusInternalServerError)
@@ -83,7 +80,6 @@ func handleConn(conn net.Conn) {
 		writeErrResponse(conn, http.StatusInternalServerError)
 		return
 	}
-	// log.Printf("HTTP/%d.%d %d %s", res.HTTPVersionMajor, res.HTTPVersionMinor, res.Code, res.Message)
 }
 
 func processRequest(req *http.Request) (int, map[string]string, []byte, error) {

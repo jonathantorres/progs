@@ -18,6 +18,7 @@ type Conf struct {
 	Group         string
 	DefaultServer *ServerConf
 	Vhosts        []ServerConf
+	Workers       int
 }
 
 type ServerConf struct {
@@ -68,6 +69,9 @@ func (c *Conf) addOption(opName string, opValue string) {
 		c.User = opValue
 	case groupOption:
 		c.Group = opValue
+	case workersOption:
+		w, _ := strconv.Atoi(opValue)
+		c.Workers = w
 	default:
 		c.DefaultServer.addOption(opName, opValue)
 	}
