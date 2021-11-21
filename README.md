@@ -7,11 +7,5 @@ If you have go installed, you can install by running the following command, othe
 $ go get github.com/jonathantorres/fserve
 ```
 
-#### Changelog
-Please see [CHANGELOG](CHANGELOG.md) for more information.
-
-#### Contributing
-Please see [CONTRIBUTING](CONTRIBUTING.md) for more details.
-
 #### License
-This library is licensed under the MIT license. Please see [LICENSE](LICENSE.md) for more information.
+This program is licensed under the MIT license. Please see [LICENSE](LICENSE.md) for more information.
