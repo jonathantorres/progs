@@ -291,7 +291,7 @@ func calculatePacketTime(buf []byte) (float64, error) {
 	tsBytes := buf[28:37]
 	n, v := binary.Varint(tsBytes)
 	if v <= 0 {
-		return 0.0, fmt.Errorf("error decoding the timestamp: %d\n", v)
+		return 0.0, fmt.Errorf("error decoding the timestamp: %d", v)
 	}
 	now := time.Now().UnixNano()
 	ms := now - n
