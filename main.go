@@ -23,7 +23,7 @@ const (
 var (
 	packetSize     = defaultPacketSize // the number of  bytes to be sent, the -s flag can change this
 	recvBufferSize = 1024              // buffer size when receiving replies
-	packetId       = 0                 // id for each packet sent
+	packetID       = 0                 // id for each packet sent
 	numTransmitted = 0                 // number of packets sent
 	numReceived    = 0                 // number of packets received
 )
@@ -74,7 +74,7 @@ func main() {
 	}
 
 	transmissionTimes = make([]float64, 0, 15) // arbitrary value
-	packetId = os.Getpid() & 0xffff
+	packetID = os.Getpid() & 0xffff
 	printPingMessage(destination, solvedDest)
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGQUIT)
@@ -178,7 +178,7 @@ func connect(dest string) (net.Conn, error) {
 }
 
 func sendPingPacket(conn net.Conn) error {
-	pack := newPacket(uint16(packetId), uint16(numTransmitted))
+	pack := newPacket(uint16(packetID), uint16(numTransmitted))
 	_, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
@@ -213,9 +213,9 @@ func recvPing(conn net.Conn, sig chan<- os.Signal) {
 }
 
 func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
-	id := getPacketId(buf)
+	id := getPacketID(buf)
 	// do nothing since this packet does not belong to this process
-	if int(id) != packetId {
+	if int(id) != packetID {
 		return
 	}
 	numReceived++
@@ -273,10 +273,10 @@ func calculateAverages() (float64, float64, float64, float64) {
 	return min, max, avg, stddev
 }
 
-func getPacketId(buf []byte) uint16 {
-	packId := buf[24:26]
-	id := uint16(packId[0]) << 8
-	id |= uint16(packId[1])
+func getPacketID(buf []byte) uint16 {
+	packID := buf[24:26]
+	id := uint16(packID[0]) << 8
+	id |= uint16(packID[1])
 	return id & 0xffff
 }
 
