@@ -222,8 +222,9 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	bLen := bytesRead - ipHeaderSize
 	raddr := conn.RemoteAddr().String()
 	seq := getPacketSeqNum(buf)
+	ttl := buf[8]
+	fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%d", bLen, raddr, seq, int(ttl))
 	packTime, err := calculatePacketTime(buf)
-	fmt.Printf("%d bytes from %s: icmp_seq=%d", bLen, raddr, seq)
 	if err == nil {
 		fmt.Printf(" time=%s\n", fmt.Sprintf("%.3fms", packTime))
 		transmissionTimes = append(transmissionTimes, packTime)
