@@ -62,7 +62,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "zing: no addresses were found for %s\n", destination)
 		os.Exit(1)
 	}
-	solvedDest := addrs[0]
+	solvedDest, err := getIPAddr(addrs)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "zing: error resolving address: %s\n", err)
+		os.Exit(1)
+	}
 	conn, err := connect(solvedDest)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "zing: error connecting: %s\n", err)
@@ -138,10 +142,10 @@ func (p *packet) buildData() []byte {
 	return pData
 }
 
-func printPingMessage(destination, solvedDest string) {
+func printPingMessage(destination string, solvedDest net.IP) {
 	fmt.Fprintf(os.Stdout, "PING %s ", destination)
-	if solvedDest != "" {
-		fmt.Fprintf(os.Stdout, "(%s)", solvedDest)
+	if solvedDest.String() != "" {
+		fmt.Fprintf(os.Stdout, "(%s)", solvedDest.String())
 	}
 	fmt.Fprintf(os.Stdout, " %d bytes of data.\n", packetSize)
 }
@@ -166,15 +170,25 @@ func pinger(conn net.Conn) {
 	}
 }
 
-func connect(dest string) (net.Conn, error) {
+func connect(dest net.IP) (net.Conn, error) {
 	raddr := net.IPAddr{
-		IP: net.ParseIP(dest),
+		IP: dest,
 	}
 	conn, err := net.DialIP("ip4:1", nil, &raddr)
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
+}
+
+func getIPAddr(addrs []string) (net.IP, error) {
+	for _, a := range addrs {
+		ip := net.ParseIP(a)
+		if ip != nil && ip.To4() != nil {
+			return ip, nil
+		}
+	}
+	return nil, fmt.Errorf("address not found")
 }
 
 func sendPingPacket(conn net.Conn) error {
