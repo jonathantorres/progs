@@ -33,3 +33,7 @@ $ zing -s 64 myurl.com
 $ zing -t 10 myurl.com
 ```
 
+`-d` Set the SO_DEBUG option on the socket being used
+```bash
+$ zing -d myurl.com
+```
