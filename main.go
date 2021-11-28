@@ -29,6 +29,7 @@ var (
 )
 
 var countF = flag.Int("c", 0, "Stop after sending -c packets")
+var debugF = flag.Bool("d", false, "Set the SO_DEBUG option on the socket being used")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
 var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
@@ -178,6 +179,12 @@ func connect(dest net.IP) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+	if *debugF {
+		err = setSocketDebugOption(conn)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return conn, nil
 }
 
@@ -311,6 +318,16 @@ func calculatePacketTime(buf []byte) (float64, error) {
 	now := time.Now().UnixNano()
 	ms := now - n
 	return float64(ms) / 1000000.00, nil
+}
+
+func setSocketDebugOption(conn *net.IPConn) error {
+	rc, err := conn.SyscallConn()
+	if err != nil {
+		return err
+	}
+	return rc.Control(func(fd uintptr) {
+		syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_DEBUG, 1)
+	})
 }
 
 func calculateChecksum(b []byte) uint16 {
