@@ -35,7 +35,7 @@ func main() {
 	destination := flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
 	if err != nil {
-		log.Fatalf("lookup for %s failed", destination)
+		log.Fatalf("lookup for %s failed: %s", destination, err)
 	}
 	if len(addrs) == 0 {
 		log.Fatalf("no addresses were found for %s", destination)
