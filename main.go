@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
@@ -19,7 +20,7 @@ var portF = flag.Int("p", 34500, "Specify the destination port to use. This numb
 var probesF = flag.Int("q", 3, "Sets the number of probe packets per hop. The default number is 3")
 
 const (
-	dataBytesLen = 16   // amount of data sent on the UDP packet
+	dataBytesLen = 24   // amount of data sent on the UDP packet
 	readBufSize  = 1024 // buffer size when reading data from the ICMP packet
 	probeTimeout = 5    // amount of seconds to wait before the response for a probe times out
 )
@@ -63,8 +64,8 @@ func main() {
 }
 
 type tracePacket struct {
-	seqNum int32
-	ttl    int32
+	seqNum int64
+	ttl    int64
 	ts     int64
 }
 
@@ -119,8 +120,8 @@ func startTrace(destIP net.IP) {
 			seqNum++
 			port++
 			d := tracePacket{
-				seqNum: int32(seqNum),
-				ttl:    int32(ttl),
+				seqNum: int64(seqNum),
+				ttl:    int64(ttl),
 				ts:     time.Now().UnixNano(),
 			}
 			startTS := d.ts
@@ -206,15 +207,10 @@ func isPortUnreachable(pInfo *probeInfo) bool {
 
 func getTracePacketData(data *tracePacket) []byte {
 	d := make([]byte, dataBytesLen)
-	// TODO: send some data
-	// this should have the sequence number
-	// the current TTL of the probe
-	// and the current timestamp
-	d[0] = 1
-	d[1] = 2
-	d[2] = 3
-	d[3] = 4
-	d[4] = 5
+	var n int
+	n = binary.PutVarint(d, data.seqNum)
+	n = binary.PutVarint(d[n:], data.ttl)
+	binary.PutVarint(d[n*2:], data.ts)
 	return d
 }
 
