@@ -42,7 +42,9 @@ func main() {
 		log.Printf("only 1 destination must be specified\n")
 		flag.Usage()
 	}
-	// TODO: validate the port number, it should be greater than 30,000
+	if *portF < 30000 {
+		log.Fatalf("port number must be greater than %d", 30000)
+	}
 	// TODO: make changes to use the process id for the initial port number
 	//       in case there's more than 1 traceroute program running
 
