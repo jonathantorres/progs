@@ -108,7 +108,8 @@ func startTrace(destIP net.IP) {
 		if done {
 			break
 		}
-		fmt.Printf("%d ", ttl)
+		fmt.Printf("%2d ", ttl)
+		var prevRouterName string
 		for pro := 0; pro < *probesF; pro++ {
 			udpConn, err := connectUDP(destIP, port, ttl)
 			if err != nil {
@@ -147,6 +148,11 @@ func startTrace(destIP net.IP) {
 			endTS := time.Now().UnixNano()
 			if pro == 0 {
 				printRouterIP(pInfo)
+				prevRouterName = pInfo.routerName
+			} else if pInfo.routerName != "" && prevRouterName != pInfo.routerName {
+				fmt.Printf("\n   ")
+				printRouterIP(pInfo)
+				prevRouterName = pInfo.routerName
 			}
 			fmt.Printf("%.3f ms   ", float64(endTS-startTS)/1000000.00)
 			if isPortUnreachable(pInfo) {
