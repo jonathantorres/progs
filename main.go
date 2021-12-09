@@ -45,8 +45,6 @@ func main() {
 	if *portF < 30000 {
 		log.Fatalf("port number must be greater than %d", 30000)
 	}
-	// TODO: make changes to use the process id for the initial port number
-	//       in case there's more than 1 traceroute program running
 
 	destination := flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
@@ -76,6 +74,7 @@ type probeInfo struct {
 	routerName string
 	icmpType   int
 	icmpCode   int
+	udpPort    int
 }
 
 var probChan chan *probeInfo
@@ -141,6 +140,10 @@ func startTrace(destIP net.IP) {
 				fmt.Printf("* ")
 				continue // continue to the next probe
 			}
+			// make sure the packet is destined for this process
+			if pInfo.udpPort != port-1 {
+				continue
+			}
 			endTS := time.Now().UnixNano()
 			if pro == 0 {
 				printRouterIP(pInfo)
@@ -176,6 +179,10 @@ func newProbeInfo(buf []byte) *probeInfo {
 	routerIP := net.IPv4(buf[12], buf[13], buf[14], buf[15])
 	icmpType := int(buf[20])
 	icmpCode := int(buf[21])
+	udpPortSli := buf[50:52]
+	udpPort := uint16(udpPortSli[0]) << 8
+	udpPort |= uint16(udpPortSli[1])
+	udpPort &= 0xffff
 
 	names, _ := net.LookupAddr(routerIP.String())
 	if len(names) > 0 {
@@ -186,6 +193,7 @@ func newProbeInfo(buf []byte) *probeInfo {
 		routerName: routerName,
 		icmpType:   icmpType,
 		icmpCode:   icmpCode,
+		udpPort:    int(udpPort),
 	}
 }
 
