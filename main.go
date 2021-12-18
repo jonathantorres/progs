@@ -143,6 +143,7 @@ func startTrace(destIP net.IP) {
 			}
 			// make sure the packet is destined for this process
 			if pInfo.udpPort != port-1 {
+				fmt.Printf("skipping packet")
 				continue
 			}
 			endTS := time.Now().UnixNano()
