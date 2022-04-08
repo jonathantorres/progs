@@ -1,8 +1,5 @@
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
 # Binaries for programs and plugins
+zing
 *.exe
 *.exe~
 *.dll
