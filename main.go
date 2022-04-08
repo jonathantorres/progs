@@ -56,7 +56,7 @@ func main() {
 		os.Exit(1)
 	}
 	destination := flag.Args()[0]
-	addrs, err := net.LookupHost(destination)
+	addrs, err := net.LookupIP(destination)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "zing: lookup for %s failed\n", destination)
 		os.Exit(1)
@@ -202,14 +202,16 @@ func connect(dest net.IP) (net.Conn, error) {
 	return conn, nil
 }
 
-func getIPAddr(addrs []string) (net.IP, error) {
+func getIPAddr(addrs []net.IP) (net.IP, error) {
 	for _, a := range addrs {
-		ip := net.ParseIP(a)
-		if ip != nil {
-			if *ip4F && ip.To4() != nil {
-				return ip, nil
-			} else if *ip6F && ip.To16() != nil {
-				return ip, nil
+		if *ip6F {
+			// we are only interested in IPv6 addresses
+			if len(a) == net.IPv6len {
+				return a, nil
+			}
+		} else {
+			if len(a) == net.IPv4len {
+				return a, nil
 			}
 		}
 	}
