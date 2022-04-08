@@ -32,6 +32,8 @@ var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var debugF = flag.Bool("d", false, "Set the SO_DEBUG option on the socket being used")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
+var ip4F = flag.Bool("4", true, "Use IPv4 only")
+var ip6F = flag.Bool("6", false, "Use IPv6 only")
 var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
 var timeoutF = flag.Int("t", 0, "Timeout, in seconds before zing exits regardless of how many packets have been received")
 
@@ -101,15 +103,21 @@ type packet struct {
 	id       uint16
 	seqNum   uint16
 	data     []byte
+	ipv6     bool
 }
 
-func newPacket(id uint16, seq uint16) *packet {
+func newPacket(id uint16, seq uint16, ipv6 bool) *packet {
+	typ := uint8(8)
+	if ipv6 {
+		typ = uint8(128)
+	}
 	return &packet{
-		pType:  uint8(8),
+		pType:  typ,
 		code:   uint8(0),
 		id:     id,
 		seqNum: seq,
 		data:   nil,
+		ipv6:   ipv6,
 	}
 }
 
@@ -172,10 +180,16 @@ func pinger(conn net.Conn) {
 }
 
 func connect(dest net.IP) (net.Conn, error) {
+	ipVer := 4
+	protoNum := 1
+	if *ip6F {
+		ipVer = 6
+		protoNum = 58
+	}
 	raddr := net.IPAddr{
 		IP: dest,
 	}
-	conn, err := net.DialIP("ip4:1", nil, &raddr)
+	conn, err := net.DialIP(fmt.Sprintf("ip%d:%d", ipVer, protoNum), nil, &raddr)
 	if err != nil {
 		return nil, err
 	}
@@ -191,15 +205,23 @@ func connect(dest net.IP) (net.Conn, error) {
 func getIPAddr(addrs []string) (net.IP, error) {
 	for _, a := range addrs {
 		ip := net.ParseIP(a)
-		if ip != nil && ip.To4() != nil {
-			return ip, nil
+		if ip != nil {
+			if *ip4F && ip.To4() != nil {
+				return ip, nil
+			} else if *ip6F && ip.To16() != nil {
+				return ip, nil
+			}
 		}
 	}
 	return nil, fmt.Errorf("address not found")
 }
 
 func sendPingPacket(conn net.Conn) error {
-	pack := newPacket(uint16(packetID), uint16(numTransmitted))
+	var ipv6 bool
+	if *ip6F {
+		ipv6 = true
+	}
+	pack := newPacket(uint16(packetID), uint16(numTransmitted), ipv6)
 	_, err := conn.Write(pack.buildData())
 	if err != nil {
 		return err
