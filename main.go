@@ -34,7 +34,7 @@ var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var debugF = flag.Bool("d", false, "Set the SO_DEBUG option on the socket being used")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
 var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply packet")
-var ip4F = flag.Bool("4", true, "Use IPv4 only")
+var ip4F = flag.Bool("4", false, "Use IPv4 only")
 var ip6F = flag.Bool("6", false, "Use IPv6 only")
 var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
 var timeoutF = flag.Int("t", 0, "Timeout, in seconds before zing exits regardless of how many packets have been received")
@@ -211,10 +211,23 @@ func getIPAddr(addrs []net.IP) (net.IP, error) {
 			if len(a) == net.IPv6len {
 				return a, nil
 			}
-		} else {
+		} else if *ip4F {
+			// we are only interested in IPv4 addresses
 			if len(a) == net.IPv4len {
 				return a, nil
 			}
+		} else {
+			// we don't care which IP type,
+			// but if this hostname resolves to an IPv6 address,
+			// enable the flag so that things work as expected
+			for _, b := range a.String() {
+				switch b {
+				case ':':
+					*ip6F = true
+					break
+				}
+			}
+			return a, nil
 		}
 	}
 	return nil, fmt.Errorf("address not found")
@@ -267,7 +280,7 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	}
 	typ := getPacketType(buf)
 	// make sure we receive only reply packets
-	if *ip6F && typ != 129 {
+	if typ != 129 && typ != 0 {
 		return
 	}
 	numReceived++
