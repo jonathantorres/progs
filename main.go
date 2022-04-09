@@ -265,6 +265,11 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 	if int(id) != packetID {
 		return
 	}
+	typ := getPacketType(buf)
+	// make sure we receive only reply packets
+	if *ip6F && typ != 129 {
+		return
+	}
 	numReceived++
 	bLen := bytesRead
 	if !*ip6F {
@@ -338,6 +343,14 @@ func getPacketID(buf []byte) uint16 {
 	id := uint16(packID[0]) << 8
 	id |= uint16(packID[1])
 	return id & 0xffff
+}
+
+func getPacketType(buf []byte) int {
+	i := 20
+	if *ip6F {
+		i = 0
+	}
+	return int(buf[i])
 }
 
 func getPacketSeqNum(buf []byte) uint16 {
