@@ -12,6 +12,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/net/ipv6"
 )
 
 const (
@@ -264,11 +266,17 @@ func printReceivedPacket(buf []byte, bytesRead int, conn net.Conn) {
 		return
 	}
 	numReceived++
-	bLen := bytesRead - ipHeaderSize
+	bLen := bytesRead
+	if !*ip6F {
+		bLen -= ipHeaderSize // ipv4 includes the IP header
+	}
 	raddr := conn.RemoteAddr().String()
 	seq := getPacketSeqNum(buf)
-	ttl := buf[8]
-	fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%d", bLen, raddr, seq, int(ttl))
+	ttl := int(buf[8])
+	if *ip6F {
+		ttl = getHopLimit(conn)
+	}
+	fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%d", bLen, raddr, seq, ttl)
 	packTime, err := calculatePacketTime(buf)
 	if err == nil {
 		fmt.Printf(" time=%s\n", fmt.Sprintf("%.3fms", packTime))
@@ -320,21 +328,39 @@ func calculateAverages() (float64, float64, float64, float64) {
 }
 
 func getPacketID(buf []byte) uint16 {
-	packID := buf[24:26]
+	st := 24
+	en := 26
+	if *ip6F {
+		st = 4
+		en = 6
+	}
+	packID := buf[st:en]
 	id := uint16(packID[0]) << 8
 	id |= uint16(packID[1])
 	return id & 0xffff
 }
 
 func getPacketSeqNum(buf []byte) uint16 {
-	seqNum := buf[26:28]
+	st := 26
+	en := 28
+	if *ip6F {
+		st = 6
+		en = 8
+	}
+	seqNum := buf[st:en]
 	num := uint16(seqNum[0]) << 8
 	num |= uint16(seqNum[1])
 	return num
 }
 
 func calculatePacketTime(buf []byte) (float64, error) {
-	tsBytes := buf[28:37]
+	st := 28
+	en := 37
+	if *ip6F {
+		st = 8
+		en = 17
+	}
+	tsBytes := buf[st:en]
 	n, v := binary.Varint(tsBytes)
 	if v <= 0 {
 		return 0.0, fmt.Errorf("error decoding the timestamp: %d", v)
@@ -342,6 +368,19 @@ func calculatePacketTime(buf []byte) (float64, error) {
 	now := time.Now().UnixNano()
 	ms := now - n
 	return float64(ms) / 1000000.00, nil
+}
+
+func getHopLimit(conn net.Conn) int {
+	c, ok := conn.(net.PacketConn)
+	if !ok {
+		return 0
+	}
+	pc := ipv6.NewPacketConn(c)
+	hl, err := pc.HopLimit()
+	if err != nil {
+		return 0
+	}
+	return hl
 }
 
 func setSocketDebugOption(conn *net.IPConn) error {
