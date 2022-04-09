@@ -33,6 +33,16 @@ $ zing -s 64 myurl.com
 $ zing -t 10 myurl.com
 ```
 
+`-4` Use IPv4 only
+```bash
+$ zing -4 myurl.com
+```
+
+`-6` Use IPv6 only
+```bash
+$ zing -6 myurl.com
+```
+
 `-d` Set the SO_DEBUG option on the socket being used
 ```bash
 $ zing -d myurl.com
