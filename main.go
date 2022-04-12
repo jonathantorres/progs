@@ -58,7 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 	destination := flag.Args()[0]
-	addrs, err := net.LookupIP(destination)
+	addrs, err := net.LookupHost(destination)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "zing: lookup for %s failed\n", destination)
 		os.Exit(1)
@@ -153,6 +153,30 @@ func (p *packet) buildData() []byte {
 	return pData
 }
 
+func isIPv6(addr string) bool {
+	var is6 bool
+	for _, a := range addr {
+		switch a {
+		case ':':
+			is6 = true
+			break
+		}
+	}
+	return is6
+}
+
+func isIPv4(addr string) bool {
+	var is4 bool
+	for _, a := range addr {
+		switch a {
+		case '.':
+			is4 = true
+			break
+		}
+	}
+	return is4
+}
+
 func printPingMessage(destination string, solvedDest net.IP) {
 	fmt.Fprintf(os.Stdout, "PING %s ", destination)
 	if solvedDest.String() != "" {
@@ -204,30 +228,30 @@ func connect(dest net.IP) (net.Conn, error) {
 	return conn, nil
 }
 
-func getIPAddr(addrs []net.IP) (net.IP, error) {
+func getIPAddr(addrs []string) (net.IP, error) {
 	for _, a := range addrs {
+		pa := net.ParseIP(a)
+		if pa == nil {
+			continue // ignore invalid addresses
+		}
 		if *ip6F {
 			// we are only interested in IPv6 addresses
-			if len(a) == net.IPv6len {
-				return a, nil
+			if isIPv6(a) {
+				return pa, nil
 			}
 		} else if *ip4F {
 			// we are only interested in IPv4 addresses
-			if len(a) == net.IPv4len {
-				return a, nil
+			if isIPv4(a) {
+				return pa, nil
 			}
 		} else {
 			// we don't care which IP type,
 			// but if this hostname resolves to an IPv6 address,
 			// enable the flag so that things work as expected
-			for _, b := range a.String() {
-				switch b {
-				case ':':
-					*ip6F = true
-					break
-				}
+			if isIPv6(a) {
+				*ip6F = true
 			}
-			return a, nil
+			return pa, nil
 		}
 	}
 	return nil, fmt.Errorf("address not found")
