@@ -31,7 +31,7 @@ func main() {
 	log.SetFlags(0)
 	flag.Parse()
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage of rt: [-d -f -m -p -q -w] host\n")
+		fmt.Fprintf(os.Stderr, "usage of rt: [-d -f -m -p -q -w -z] host\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
