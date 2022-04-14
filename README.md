@@ -37,3 +37,8 @@ $ rt -p 34500 myurl.com
 ```bash
 $ rt -q 3 myurl.com
 ```
+
+`-w` Probe timeout. Specify how many seconds to wait for a response to a probe. Default value is 5
+```bash
+$ rt -w 5 myurl.com
+```
