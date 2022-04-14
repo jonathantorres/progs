@@ -1,11 +1,10 @@
 # Binaries for programs and plugins
+rt
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-*.sublime-project
-*.sublime-workspace
 
 # Test binary, built with `go test -c`
 *.test
