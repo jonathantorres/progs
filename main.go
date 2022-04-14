@@ -282,7 +282,7 @@ func recvPing(conn net.Conn, sig chan<- os.Signal) {
 		b, err := conn.Read(buf)
 		if err != nil {
 			if errors.Is(err, os.ErrDeadlineExceeded) {
-				fmt.Fprintf(os.Stderr, "Request timeout\n")
+				fmt.Fprintf(os.Stderr, "request timeout: %s\n", err)
 			} else {
 				fmt.Fprintf(os.Stderr, "read error: %s\n", err)
 			}
