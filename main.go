@@ -18,11 +18,11 @@ var ttlF = flag.Int("f", 1, "Specify with what TTL to start. Defaults to 1")
 var hopsF = flag.Int("m", 30, "Specify the maximum number of hops (max time-to-live value) the program will probe. The default is 30")
 var portF = flag.Int("p", 34500, "Specify the destination port to use. This number will be incremented by each probe")
 var probesF = flag.Int("q", 3, "Sets the number of probe packets per hop. The default number is 3")
+var probeTimeoutF = flag.Int("w", 5, "Probe timeout. Determines how long to wait for a response to a probe")
 
 const (
 	dataBytesLen = 24   // amount of data sent on the UDP packet
 	readBufSize  = 1024 // buffer size when reading data from the ICMP packet
-	probeTimeout = 5    // amount of seconds to wait before the response for a probe times out
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	log.SetFlags(0)
 	flag.Parse()
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage of rt: [-d -f -m -p -q] host\n")
+		fmt.Fprintf(os.Stderr, "usage of rt: [-d -f -m -p -q -w] host\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -132,7 +132,7 @@ func startTrace(destIP net.IP) {
 				log.Printf("error sending data: %s", err)
 				continue
 			}
-			timer := time.NewTimer(probeTimeout * time.Second)
+			timer := time.NewTimer(time.Duration(*probeTimeoutF) * time.Second)
 			var pInfo *probeInfo
 			select {
 			case pInfo = <-probChan:
