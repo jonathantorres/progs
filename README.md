@@ -42,3 +42,8 @@ $ rt -q 3 myurl.com
 ```bash
 $ rt -w 5 myurl.com
 ```
+
+`-z` Minimum amount of time to wait between probes (in seconds). The default is 0
+```bash
+$ rt -z 1 myurl.com
+```

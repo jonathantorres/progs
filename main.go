@@ -19,6 +19,7 @@ var hopsF = flag.Int("m", 30, "Specify the maximum number of hops (max time-to-l
 var portF = flag.Int("p", 34500, "Specify the destination port to use. This number will be incremented by each probe")
 var probesF = flag.Int("q", 3, "Sets the number of probe packets per hop. The default number is 3")
 var probeTimeoutF = flag.Int("w", 5, "Probe timeout. Determines how long to wait for a response to a probe")
+var probeIntF = flag.Int("z", 0, "Minimum amount of time to wait between probes (in seconds). The default is 0")
 
 const (
 	dataBytesLen = 24   // amount of data sent on the UDP packet
@@ -158,6 +159,10 @@ func startTrace(destIP net.IP) {
 			fmt.Printf("%.3f ms   ", float64(endTS-startTS)/1000000.00)
 			if isPortUnreachable(pInfo) {
 				done = true
+			}
+			// wait interval before sending the next probe
+			if *probeIntF > 0 {
+				time.Sleep(time.Duration(*probeIntF) * time.Second)
 			}
 		}
 		fmt.Println()
