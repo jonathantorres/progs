@@ -22,8 +22,9 @@ var probeTimeoutF = flag.Int("w", 5, "Probe timeout. Determines how long to wait
 var probeIntF = flag.Int("z", 0, "Minimum amount of time to wait between probes (in seconds). The default is 0")
 
 const (
-	dataBytesLen = 24   // amount of data sent on the UDP packet
-	readBufSize  = 1024 // buffer size when reading data from the ICMP packet
+	dataBytesLen = 24    // amount of data sent on the UDP packet
+	readBufSize  = 1024  // buffer size when reading data from the ICMP packets
+	maxPortNum   = 30000 // max port number that we will use in the UDP packet
 )
 
 func main() {
@@ -43,8 +44,8 @@ func main() {
 		log.Printf("only 1 destination must be specified\n")
 		flag.Usage()
 	}
-	if *portF < 30000 {
-		log.Fatalf("port number must be greater than %d", 30000)
+	if *portF < maxPortNum {
+		log.Fatalf("port number must be greater than %d", maxPortNum)
 	}
 
 	destination := flag.Args()[0]
