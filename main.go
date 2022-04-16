@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"golang.org/x/net/ipv4"
+	"golang.org/x/net/ipv6"
 )
 
 var debugF = flag.Bool("d", false, "Enable socket level debugging (if supported)")
@@ -20,6 +21,9 @@ var portF = flag.Int("p", 34500, "Specify the destination port to use. This numb
 var probesF = flag.Int("q", 3, "Sets the number of probe packets per hop. The default number is 3")
 var probeTimeoutF = flag.Int("w", 5, "Probe timeout. Determines how long to wait for a response to a probe")
 var probeIntF = flag.Int("z", 0, "Minimum amount of time to wait between probes (in seconds). The default is 0")
+
+var ip4F = flag.Bool("4", false, "Use IPv4 only")
+var ip6F = flag.Bool("6", false, "Use IPv6 only")
 
 const (
 	dataBytesLen = 24    // amount of data sent on the UDP packet
@@ -82,22 +86,28 @@ type probeInfo struct {
 var probChan chan *probeInfo
 
 func listenICMP() {
+	ipVer := 4
+	protoNum := 1
+	if *ip6F {
+		ipVer = 6
+		protoNum = 58
+	}
 	laddr := net.IPAddr{
 		IP: nil,
 	}
-	conn, err := net.ListenIP("ip4:1", &laddr)
+	conn, err := net.ListenIP(fmt.Sprintf("ip%d:%d", ipVer, protoNum), &laddr)
 	if err != nil {
 		log.Fatalf("error listening for ICPMP packets: %s", err)
 	}
 	probChan = make(chan *probeInfo)
 	for {
 		buf := make([]byte, readBufSize)
-		_, err = conn.Read(buf)
+		_, raddr, err := conn.ReadFrom(buf)
 		if err != nil {
 			log.Printf("error reading data: %s", err)
 			continue
 		}
-		pInfo := newProbeInfo(buf)
+		pInfo := newProbeInfo(raddr, buf)
 		probChan <- pInfo
 	}
 }
@@ -145,7 +155,6 @@ func startTrace(destIP net.IP) {
 			}
 			// make sure the packet is destined for this process
 			if pInfo.udpPort != port-1 {
-				fmt.Printf("skipping packet")
 				continue
 			}
 			endTS := time.Now().UnixNano()
@@ -175,23 +184,41 @@ func connectUDP(destIP net.IP, port int, ttl int) (*net.UDPConn, error) {
 		IP:   destIP,
 		Port: port,
 	}
-	udpConn, err := net.DialUDP("udp4", nil, &raddr)
+	ipVer := 4
+	if *ip6F {
+		ipVer = 6
+	}
+	udpConn, err := net.DialUDP(fmt.Sprintf("udp%d", ipVer), nil, &raddr)
 	if err != nil {
 		return nil, err
 	}
-	nconn := ipv4.NewConn(udpConn)
-	err = nconn.SetTTL(ttl)
+	if *ip6F {
+		nconn := ipv6.NewConn(udpConn)
+		err = nconn.SetHopLimit(ttl)
+	} else {
+		nconn := ipv4.NewConn(udpConn)
+		err = nconn.SetTTL(ttl)
+	}
 	if err != nil {
 		return nil, err
 	}
 	return udpConn, nil
 }
 
-func newProbeInfo(buf []byte) *probeInfo {
+func newProbeInfo(raddr net.Addr, buf []byte) *probeInfo {
 	var routerName string
-	routerIP := net.IPv4(buf[12], buf[13], buf[14], buf[15])
-	icmpType := int(buf[20])
-	icmpCode := int(buf[21])
+	var icmpType int
+	var icmpCode int
+	var routerIP net.IP
+	if *ip6F {
+		icmpType = int(buf[0])
+		icmpCode = int(buf[1])
+		routerIP = net.ParseIP(raddr.String())
+	} else {
+		routerIP = net.IPv4(buf[12], buf[13], buf[14], buf[15])
+		icmpType = int(buf[20])
+		icmpCode = int(buf[21])
+	}
 	udpPortSli := buf[50:52]
 	udpPort := uint16(udpPortSli[0]) << 8
 	udpPort |= uint16(udpPortSli[1])
@@ -222,8 +249,14 @@ func printRouterIP(pInfo *probeInfo) {
 }
 
 func isPortUnreachable(pInfo *probeInfo) bool {
-	if pInfo.icmpType == 3 && pInfo.icmpCode == 3 {
-		return true
+	if *ip6F {
+		if pInfo.icmpType == 1 && pInfo.icmpCode == 4 {
+			return true
+		}
+	} else {
+		if pInfo.icmpType == 3 && pInfo.icmpCode == 3 {
+			return true
+		}
 	}
 	return false
 }
@@ -247,12 +280,55 @@ func printStart(destination string, destinationIP net.IP) {
 
 func getIPAddr(addrs []string) (net.IP, error) {
 	for _, a := range addrs {
-		ip := net.ParseIP(a)
-		if ip != nil && ip.To4() != nil {
-			return ip, nil
+		pa := net.ParseIP(a)
+		if pa == nil {
+			continue // ignore invalid addresses
+		}
+		if *ip6F {
+			// we are only interested in IPv6 addresses
+			if isIPv6(a) {
+				return pa, nil
+			}
+		} else if *ip4F {
+			// we are only interested in IPv4 addresses
+			if isIPv4(a) {
+				return pa, nil
+			}
+		} else {
+			// we don't care which IP type,
+			// but if this hostname resolves to an IPv6 address,
+			// enable the flag so that things work as expected
+			if isIPv6(a) {
+				*ip6F = true
+			}
+			return pa, nil
 		}
 	}
 	return nil, fmt.Errorf("address not found")
+}
+
+func isIPv6(addr string) bool {
+	var is6 bool
+	for _, a := range addr {
+		switch a {
+		case ':':
+			is6 = true
+			break
+		}
+	}
+	return is6
+}
+
+func isIPv4(addr string) bool {
+	var is4 bool
+	for _, a := range addr {
+		switch a {
+		case '.':
+			is4 = true
+			break
+		}
+	}
+	return is4
 }
 
 func setSocketDebugOption(conn *net.UDPConn) error {
