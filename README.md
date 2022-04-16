@@ -1,5 +1,5 @@
 # Routetrace
-A traceroute clone. It uses UDP (IPv4) as the probing mechanism.
+A traceroute clone. It uses UDP as the probing mechanism.
 
 ## Install
 Install by running the following command
@@ -36,6 +36,16 @@ $ rt -p 34500 myurl.com
 `-q` Sets the number of probe packets per hop. The default number is 3
 ```bash
 $ rt -q 3 myurl.com
+```
+
+`-4` Use IPv4 only
+```bash
+$ rt -4 myurl.com
+```
+
+`-6` Use IPv6 only
+```bash
+$ rt -6 myurl.com
 ```
 
 `-w` Probe timeout. Specify how many seconds to wait for a response to a probe. Default value is 5
