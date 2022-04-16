@@ -102,7 +102,12 @@ func listenICMP() {
 	probChan = make(chan *probeInfo)
 	for {
 		buf := make([]byte, readBufSize)
-		_, raddr, err := conn.ReadFrom(buf)
+		var raddr net.Addr
+		if *ip6F {
+			_, raddr, err = conn.ReadFrom(buf)
+		} else {
+			_, err = conn.Read(buf)
+		}
 		if err != nil {
 			log.Printf("error reading data: %s", err)
 			continue
