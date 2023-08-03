@@ -1,3 +1,3 @@
 module github.com/jonathantorres/voy
 
-go 1.14
+go 1.19
