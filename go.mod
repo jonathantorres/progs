@@ -1,4 +1,4 @@
-module github.com/jonathantorres/zing
+module github.com/jonathantorres/net
 
 go 1.15
 
