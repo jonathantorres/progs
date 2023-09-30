@@ -39,44 +39,44 @@ var exitF = flag.Bool("o", false, "Exit successfully after receiving one reply p
 var ip4F = flag.Bool("4", false, "Use IPv4 only")
 var ip6F = flag.Bool("6", false, "Use IPv6 only")
 var packetSizeF = flag.Int("s", defaultPacketSize, "Specify the number of data bytes to be sent")
-var timeoutF = flag.Int("t", 0, "Timeout, in seconds before zing exits regardless of how many packets have been received")
+var timeoutF = flag.Int("t", 0, "Timeout, in seconds before ping exits regardless of how many packets have been received")
 
 var transmissionTimes []float64
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of zing:\n")
+		fmt.Fprintf(os.Stderr, "Usage of ping:\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
 	if len(flag.Args()) == 0 {
-		fmt.Fprintf(os.Stderr, "zing: a destination must be specified\n")
+		fmt.Fprintf(os.Stderr, "ping: a destination must be specified\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	if len(flag.Args()) > 1 {
-		fmt.Fprintf(os.Stderr, "zing: only 1 destination must be specified\n")
+		fmt.Fprintf(os.Stderr, "ping: only 1 destination must be specified\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	destination := flag.Args()[0]
 	addrs, err := net.LookupHost(destination)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "zing: lookup for %s failed\n", destination)
+		fmt.Fprintf(os.Stderr, "ping: lookup for %s failed\n", destination)
 		os.Exit(1)
 	}
 	if len(addrs) == 0 {
-		fmt.Fprintf(os.Stderr, "zing: no addresses were found for %s\n", destination)
+		fmt.Fprintf(os.Stderr, "ping: no addresses were found for %s\n", destination)
 		os.Exit(1)
 	}
 	solvedDest, err := getIPAddr(addrs)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "zing: error resolving address: %s\n", err)
+		fmt.Fprintf(os.Stderr, "ping: error resolving address: %s\n", err)
 		os.Exit(1)
 	}
 	conn, err := connect(solvedDest)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "zing: error connecting: %s\n", err)
+		fmt.Fprintf(os.Stderr, "ping: error connecting: %s\n", err)
 		os.Exit(1)
 	}
 
