@@ -30,8 +30,6 @@ var (
 	numReceived    = 0                 // number of packets received
 )
 
-// something
-
 var countF = flag.Int("c", 0, "Stop after sending -c packets")
 var debugF = flag.Bool("d", false, "Set the SO_DEBUG option on the socket being used")
 var waitF = flag.Int("i", 1, "Wait -i seconds between sending each packet")
