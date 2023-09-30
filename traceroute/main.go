@@ -32,11 +32,11 @@ const (
 )
 
 func main() {
-	log.SetPrefix("rt: ")
+	log.SetPrefix("traceroute: ")
 	log.SetFlags(0)
 	flag.Parse()
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage of rt: [-d -f -m -p -q -w -z] host\n")
+		fmt.Fprintf(os.Stderr, "usage of traceroute: [-d -f -m -p -q -w -z] host\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
