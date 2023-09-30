@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # gonew
 Simple tool to generate a new go project.
 
@@ -32,10 +31,15 @@ $ gonew  -p myproject
 =======
 # dcl
 Parse a C declaration into words
+=======
+# poli
+A Reverse Polish calculator
+>>>>>>> poli/master
 
 ## Install
 Install by running the following command
 ```bash
+<<<<<<< HEAD
 $ go get github.com/jonathantorres/dcl
 ```
 
@@ -57,4 +61,16 @@ comp: function returning pointer to void
 void (*comp)()
 comp: pointer to function returning void
 >>>>>>> dcl/master
+=======
+$ go get github.com/jonathantorres/poli
+```
+
+## Usage
+After installing, run the program `poli` and start entering the commands to do the calculations, the basic operations are available (addition, substraction, multiplication, division, modulo)
+```bash
+100 100 +
+        200
+
+1 2 - 4 5 + *
+        -9
 ```
