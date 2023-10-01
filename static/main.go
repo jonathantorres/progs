@@ -14,7 +14,7 @@ import (
 var defaultPort = 9090
 var port = flag.Int("p", defaultPort, "server port")
 var showVersion = flag.Bool("v", false, "print server version")
-var useLogFile = flag.Bool("l", false, "save logs in a file (fserve.log)")
+var useLogFile = flag.Bool("l", false, "save logs in a file (static.log)")
 var fileLogger *log.Logger = nil
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	if *showVersion {
 		printVersion()
 	}
-	fmt.Printf("fserve running on port %d\n", *port)
+	fmt.Printf("static running on port %d\n", *port)
 	if *useLogFile {
 		registerLogger()
 	}
@@ -137,7 +137,7 @@ func findFile(url *url.URL) (*os.File, error) {
 }
 
 func registerLogger() {
-	logfile, err := os.Create("fserve.log")
+	logfile, err := os.Create("static.log")
 	if err != nil {
 		log.Printf("error creating log file: %s", err)
 		return

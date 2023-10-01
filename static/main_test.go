@@ -51,12 +51,12 @@ func startServer() error {
 	compileCmd := exec.Command("go", "build")
 	err := compileCmd.Run()
 	if err != nil {
-		return fmt.Errorf("problem building fserve: %s", err)
+		return fmt.Errorf("problem building static: %s", err)
 	}
-	serverCmd = exec.Command("./fserve", "-p", serverPort)
+	serverCmd = exec.Command("./static", "-p", serverPort)
 	err = serverCmd.Start()
 	if err != nil {
-		return fmt.Errorf("problem starting fserve: %s", err)
+		return fmt.Errorf("problem starting static: %s", err)
 	}
 	time.Sleep(1 * time.Second)
 	return nil
@@ -66,7 +66,7 @@ func stopServer() error {
 	if serverCmd.Process != nil {
 		err := serverCmd.Process.Kill()
 		if err != nil {
-			return fmt.Errorf("problem killing fserve process: %s", err)
+			return fmt.Errorf("problem killing static process: %s", err)
 		}
 		cleanCmd := exec.Command("go", "clean")
 		err = cleanCmd.Run()
@@ -75,5 +75,5 @@ func stopServer() error {
 		}
 		return nil
 	}
-	return fmt.Errorf("problem stopping fserve: process is not running")
+	return fmt.Errorf("problem stopping static: process is not running")
 }
