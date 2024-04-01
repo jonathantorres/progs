@@ -1,6 +1,6 @@
 POST /user/create HTTP/1.1
 Host: www.example.com
-Server: voy v0.1.0
+Server: httpd v0.1.0
 Connection: close
 Content-Length: 41
 

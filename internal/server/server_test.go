@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jonathantorres/voy/internal/conf"
+	"github.com/jonathantorres/httpd/internal/conf"
 )
 
 func TestMain(m *testing.M) {
-	cmd, err := startServer("testdata/voy.conf")
+	cmd, err := startServer("testdata/httpd.conf")
 	if err != nil {
 		log.Fatalf("server could not be started: %s\n", err)
 	}
@@ -165,12 +165,12 @@ func startServer(confPath string) (*exec.Cmd, error) {
 	compCmd := exec.Command("go", "build")
 	err = compCmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("problem building voy: %s", err)
+		return nil, fmt.Errorf("problem building httpd: %s", err)
 	}
-	serverCmd := exec.Command("./voy", "-c", confPath)
+	serverCmd := exec.Command("./httpd", "-c", confPath)
 	err = serverCmd.Start()
 	if err != nil {
-		return nil, fmt.Errorf("problem starting voy: %s", err)
+		return nil, fmt.Errorf("problem starting httpd: %s", err)
 	}
 	time.Sleep(1 * time.Second) // wait a little bit so that everything is ready
 	return serverCmd, nil
@@ -178,12 +178,12 @@ func startServer(confPath string) (*exec.Cmd, error) {
 
 func stopServer(serverCmd *exec.Cmd) error {
 	if serverCmd == nil {
-		return fmt.Errorf("problem stopping voy: process is not running")
+		return fmt.Errorf("problem stopping httpd: process is not running")
 	}
 	if serverCmd.Process != nil {
 		err := serverCmd.Process.Kill()
 		if err != nil {
-			return fmt.Errorf("problem killing voy process: %s", err)
+			return fmt.Errorf("problem killing httpd process: %s", err)
 		}
 		cleanCmd := exec.Command("go", "clean")
 		err = cleanCmd.Run()
@@ -192,5 +192,5 @@ func stopServer(serverCmd *exec.Cmd) error {
 		}
 		return nil
 	}
-	return fmt.Errorf("problem stopping voy: process is not running")
+	return fmt.Errorf("problem stopping httpd: process is not running")
 }

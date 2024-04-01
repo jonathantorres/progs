@@ -1,3 +1,3 @@
-module github.com/jonathantorres/voy
+module github.com/jonathantorres/httpd
 
 go 1.19

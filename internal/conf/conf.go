@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jonathantorres/voy/internal/http"
+	"github.com/jonathantorres/httpd/internal/http"
 )
 
 // This is supposed to validate, test and parse the configuration file

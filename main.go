@@ -8,15 +8,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jonathantorres/voy/internal/conf"
-	"github.com/jonathantorres/voy/internal/server"
-	"github.com/jonathantorres/voy/internal/voy"
+	"github.com/jonathantorres/httpd/internal/conf"
+	"github.com/jonathantorres/httpd/internal/server"
 )
 
+const Version = "0.1.0"
+
 const (
-	defaultPrefix   = "/usr/local/voy"
-	defaultConfFile = defaultPrefix + "/conf/voy.conf"
-	defaultLogFile  = defaultPrefix + "/log/voy.log"
+	defaultPrefix   = "/usr/local/httpd"
+	defaultConfFile = defaultPrefix + "/conf/httpd.conf"
+	defaultLogFile  = defaultPrefix + "/log/httpd.log"
 	versionFDesc    = "print current version"
 	confFDesc       = "specify the location of the configuration file"
 	logFDesc        = "specify the location of the log file"
@@ -37,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	if versionF {
-		fmt.Fprintf(os.Stdout, "voy server v%s\n", voy.Version)
+		fmt.Fprintf(os.Stdout, "httpd server v%s\n", Version)
 		os.Exit(0)
 	}
 	// TODO: initialize logging mechanism

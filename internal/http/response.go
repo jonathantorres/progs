@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jonathantorres/voy/internal/voy"
+	"github.com/jonathantorres/httpd/internal/version"
 )
 
 type Response struct {
@@ -62,5 +62,5 @@ func SendErrorResponse(code int, msg string) *Response {
 }
 
 func addDefaultResponseHeaders(headers map[string]string) {
-	headers["Server"] = "voy v" + voy.Version
+	headers["Server"] = "httpd v" + version.Version
 }

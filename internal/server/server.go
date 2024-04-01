@@ -7,8 +7,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/jonathantorres/voy/internal/conf"
-	"github.com/jonathantorres/voy/internal/http"
+	"github.com/jonathantorres/httpd/internal/conf"
+	"github.com/jonathantorres/httpd/internal/http"
 )
 
 // starts the server process and handles every request sent to it

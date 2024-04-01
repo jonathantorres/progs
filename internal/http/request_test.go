@@ -28,7 +28,7 @@ var cases = []struct {
 		"get_payload2", "GET", "/foo/bar", 1, 1,
 		map[string][]string{
 			"Host":       {"www.example.com"},
-			"Server":     {"voy v0.1.0"},
+			"Server":     {"httpd v0.1.0"},
 			"Connection": {"close"},
 		},
 	},
@@ -36,7 +36,7 @@ var cases = []struct {
 		"post_payload3", "POST", "/user/create", 1, 1,
 		map[string][]string{
 			"Host":           {"www.example.com"},
-			"Server":         {"voy v0.1.0"},
+			"Server":         {"httpd v0.1.0"},
 			"Connection":     {"close"},
 			"Content-Length": {"41"},
 		},

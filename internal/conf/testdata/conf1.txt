@@ -7,8 +7,8 @@ group = www-data
 index = index.html,index.htm
 error_page = error.html
 error_page_404 = 404.html # the code can be replaced for any response code >= 400
-error_log = /etc/log/voy/errors.log
-access_log = /etc/log/voy/access.log
+error_log = /etc/log/httpd/errors.log
+access_log = /etc/log/httpd/access.log
 workers = 5
 
 # Include a file
@@ -20,6 +20,6 @@ vhost {
     root = /var/www/mydomain.com/public
     index = index.html
     error_page = error.html
-    error_log = /etc/log/voy/mydomain.com.log
-    access_log = /etc/log/voy/mydomain.com.log
+    error_log = /etc/log/httpd/mydomain.com.log
+    access_log = /etc/log/httpd/mydomain.com.log
 }

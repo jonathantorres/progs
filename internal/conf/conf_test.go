@@ -63,8 +63,8 @@ func TestServerConfIsBuilt(t *testing.T) {
 					Page: "404.html",
 				},
 			},
-			ErrorLog:  "/etc/log/voy/errors.log",
-			AccessLog: "/etc/log/voy/access.log",
+			ErrorLog:  "/etc/log/httpd/errors.log",
+			AccessLog: "/etc/log/httpd/access.log",
 		},
 		Vhosts: []ServerConf{
 			{
@@ -78,8 +78,8 @@ func TestServerConfIsBuilt(t *testing.T) {
 						Page: "error.html",
 					},
 				},
-				ErrorLog:  "/etc/log/voy/mydomain.com.log",
-				AccessLog: "/etc/log/voy/mydomain.com.log",
+				ErrorLog:  "/etc/log/httpd/mydomain.com.log",
+				AccessLog: "/etc/log/httpd/mydomain.com.log",
 			},
 			{
 				Names:      []string{"example.com", "www.example.com"},
@@ -92,8 +92,8 @@ func TestServerConfIsBuilt(t *testing.T) {
 						Page: "error.html",
 					},
 				},
-				ErrorLog:  "/etc/log/voy/mydomain.com.log",
-				AccessLog: "/etc/log/voy/mydomain.com.log",
+				ErrorLog:  "/etc/log/httpd/mydomain.com.log",
+				AccessLog: "/etc/log/httpd/mydomain.com.log",
 			},
 			{
 				Names:      []string{"test.com", "www.test.com"},
@@ -106,8 +106,8 @@ func TestServerConfIsBuilt(t *testing.T) {
 						Page: "error.html",
 					},
 				},
-				ErrorLog:  "/etc/log/voy/mydomain.com.log",
-				AccessLog: "/etc/log/voy/mydomain.com.log",
+				ErrorLog:  "/etc/log/httpd/mydomain.com.log",
+				AccessLog: "/etc/log/httpd/mydomain.com.log",
 			},
 		},
 	}
