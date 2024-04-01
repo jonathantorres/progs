@@ -1,8 +1,8 @@
-# voy
-HTTP server
+# httpd
+HTTP server daemon
 
 ## Install
-If you have go installed, you can install by running the following command, otherwise you can download the binary for your operating system from the latest release [here](https://github.com/jonathantorres/voy/releases/latest).
+If you have go installed, you can install by running the following command:
 ```bash
-$ go get github.com/jonathantorres/voy
+$ go get github.com/jonathantorres/httpd
 ```
