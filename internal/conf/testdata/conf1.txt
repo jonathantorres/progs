@@ -1,0 +1,25 @@
+# This is a comment
+name = localhost # it should be the hostname (mydomain.com)
+root = /var/www/localhost
+port = 80,443 # for whenever https support is added
+user = www-data
+group = www-data
+index = index.html,index.htm
+error_page = error.html
+error_page_404 = 404.html # the code can be replaced for any response code >= 400
+error_log = /etc/log/httpd/errors.log
+access_log = /etc/log/httpd/access.log
+workers = 5
+
+# Include a file
+#include some_file.conf
+
+vhost {
+    name = mydomain.com
+    port = 8081
+    root = /var/www/mydomain.com/public
+    index = index.html
+    error_page = error.html
+    error_log = /etc/log/httpd/mydomain.com.log
+    access_log = /etc/log/httpd/mydomain.com.log
+}
