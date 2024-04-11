@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"fmt"
@@ -12,8 +12,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/jonathantorres/httpd/internal/conf"
 )
 
 func TestMain(m *testing.M) {
@@ -58,7 +56,7 @@ func TestSimplePostRequest(t *testing.T) {
 }
 
 func TestLargePostRequest(t *testing.T) {
-	f, err := os.Open("internal/server/testdata/post_data.txt")
+	f, err := os.Open("testdata/post_data.txt")
 	if err != nil {
 		t.Fatalf("%s\n", err)
 	}
@@ -96,14 +94,14 @@ func TestLargeRequestLine(t *testing.T) {
 
 func TestGetPortsToListen(t *testing.T) {
 	tests := []struct {
-		c    *conf.Conf
+		c    *Conf
 		want []int
 	}{
 		{
-			&conf.Conf{
+			&Conf{
 				User:  "foo",
 				Group: "bar",
-				DefaultServer: &conf.ServerConf{
+				DefaultServer: &ServerConf{
 					Names: []string{"one", "two", "three"},
 					Root:  "/foo/bar",
 					Ports: []int{80, 8080, 8081},
@@ -112,10 +110,10 @@ func TestGetPortsToListen(t *testing.T) {
 			[]int{80, 8080, 8081},
 		},
 		{
-			&conf.Conf{
+			&Conf{
 				User:  "baz",
 				Group: "bazzer",
-				DefaultServer: &conf.ServerConf{
+				DefaultServer: &ServerConf{
 					Names: []string{"bee", "sting", "print"},
 					Root:  "/tmp/server",
 					Ports: []int{80, 443, 80, 80, 9090, 9090, 9091},
@@ -137,10 +135,10 @@ func TestGetPortsToListen(t *testing.T) {
 }
 
 func TestGetPortsToListenWithNoPorts(t *testing.T) {
-	c := &conf.Conf{
+	c := &Conf{
 		User:  "foo",
 		Group: "bar",
-		DefaultServer: &conf.ServerConf{
+		DefaultServer: &ServerConf{
 			Names: []string{"one", "two", "three"},
 			Root:  "/foo/bar",
 			Ports: []int{},

@@ -1,4 +1,4 @@
-package conf
+package main
 
 import (
 	"bufio"
@@ -7,11 +7,30 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/jonathantorres/httpd/internal/http"
 )
 
 // This is supposed to validate, test and parse the configuration file
+const (
+	equalSign      = '='
+	openBracket    = '{'
+	closingBracket = '}'
+	commentSign    = '#'
+)
+
+const (
+	nameOption      = "name"
+	rootOption      = "root"
+	portOption      = "port"
+	userOption      = "user"
+	groupOption     = "group"
+	indexOption     = "index"
+	errorPageOption = "error_page"
+	errorLogOption  = "error_log"
+	accessLogOption = "access_log"
+	includeOption   = "include"
+	vhostOption     = "vhost"
+	workersOption   = "workers"
+)
 
 type Conf struct {
 	User          string
@@ -177,7 +196,7 @@ func (s *ServerConf) parseErrorPageOptions(errorType, page string) {
 	}
 	if len(eTypePieces) == 2 {
 		errPage = ErrorPage{
-			Code: http.StatusBadRequest,
+			Code: StatusBadRequest,
 			Page: strings.TrimSpace(page),
 		}
 	}

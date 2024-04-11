@@ -7,9 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/jonathantorres/httpd/internal/conf"
-	"github.com/jonathantorres/httpd/internal/server"
 )
 
 const Version = "0.1.0"
@@ -45,13 +42,13 @@ func main() {
 	// TODO: figure out which path to use for the configuration file
 	// either from the -conf option, or configured from the build
 	// the -conf option would override any location set in the build
-	c, err := conf.Load(confF)
+	c, err := Load(confF)
 	if err != nil {
 		log.Fatalf("%s, exiting...", err)
 	}
 	go sigHandler()
 	// start the server
-	if err := server.Start(c); err != nil {
+	if err := Start(c); err != nil {
 		log.Fatalf("%s, exiting...", err)
 	}
 }

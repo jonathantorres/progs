@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"errors"
@@ -6,15 +6,12 @@ import (
 	"log"
 	"net"
 	"sync"
-
-	"github.com/jonathantorres/httpd/internal/conf"
-	"github.com/jonathantorres/httpd/internal/http"
 )
 
 // starts the server process and handles every request sent to it
 // handles server start, restart and shutdown
 
-func Start(conf *conf.Conf) error {
+func Start(conf *Conf) error {
 	ports, err := getPortsToListen(conf)
 	if err != nil {
 		return err
@@ -56,33 +53,33 @@ func Start(conf *conf.Conf) error {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	req := http.NewRequest(conn)
+	req := NewRequest(conn)
 	err := req.Parse()
 	if err != nil {
 		// TODO: FIX!
-		if errors.Is(err, http.ErrInvalidRequestLine) {
-			writeErrResponse(conn, http.StatusBadRequest)
+		if errors.Is(err, ErrInvalidRequestLine) {
+			writeErrResponse(conn, StatusBadRequest)
 		} else {
-			writeErrResponse(conn, http.StatusInternalServerError)
+			writeErrResponse(conn, StatusInternalServerError)
 		}
 		return
 	}
 
 	code, headers, body, err := processRequest(req)
 	if err != nil {
-		writeErrResponse(conn, http.StatusInternalServerError)
+		writeErrResponse(conn, StatusInternalServerError)
 		return
 	}
 
-	res := http.NewResponse(code, headers, body)
-	_, err = conn.Write(http.BuildResponseBytes(res))
+	res := NewResponse(code, headers, body)
+	_, err = conn.Write(BuildResponseBytes(res))
 	if err != nil {
-		writeErrResponse(conn, http.StatusInternalServerError)
+		writeErrResponse(conn, StatusInternalServerError)
 		return
 	}
 }
 
-func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
+func processRequest(req *Request) (int, map[string]string, []byte, error) {
 	headers := make(map[string]string)
 	body := make([]byte, 0)
 	code := 200 // TODO
@@ -93,15 +90,15 @@ func processRequest(req *http.Request) (int, map[string]string, []byte, error) {
 }
 
 func writeErrResponse(conn net.Conn, code int) {
-	msg, _ := http.GetStatusCodeMessage(code)
-	bytes := http.BuildResponseBytes(http.SendErrorResponse(code, msg))
+	msg, _ := GetStatusCodeMessage(code)
+	bytes := BuildResponseBytes(SendErrorResponse(code, msg))
 	_, err := conn.Write(bytes)
 	if err != nil {
 		log.Printf("error writing error response %s", err)
 	}
 }
 
-func getPortsToListen(conf *conf.Conf) ([]int, error) {
+func getPortsToListen(conf *Conf) ([]int, error) {
 	foundPorts := make([]int, 0, 5)
 	if conf.DefaultServer != nil {
 		for _, p := range conf.DefaultServer.Ports {
